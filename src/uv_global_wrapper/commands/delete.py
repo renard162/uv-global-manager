@@ -25,7 +25,6 @@ def register(subparsers: argparse._SubParsersAction):
 def delete_run(args: argparse.Namespace):
     parser: argparse.ArgumentParser = args.parser
 
-    # Exibe o help quando nenhum argumento é informado
     if args.name is None:
         parser.print_help()
         return
