@@ -1,4 +1,5 @@
 import argparse
+from shutil import which
 
 from .commands import (
     activate,
@@ -11,6 +12,8 @@ from .commands import (
 
 
 def main():
+    integrity_check()
+
     parser = argparse.ArgumentParser(prog="avg")
     sub = parser.add_subparsers(dest="command")
 
@@ -27,3 +30,11 @@ def main():
         return 0
 
     args.func(args)
+
+
+def integrity_check():
+    if (which("uv") is None) or (which("uvx") is None):
+        raise FileNotFoundError(
+            "Required executable 'UV' was not found in the PATH. Install UV and ensure it is accessible from the command line before using uv-global-wrapper."
+        )
+    return 0
