@@ -44,7 +44,7 @@ def main():
 
 
 def integrity_check():
-    if which("uv") is not None or which("uvx") is None:
+    if which("uv") is None or which("uvx") is None:
         raise FileNotFoundError(
             "Required executable 'UV' was not found in the PATH. "
             "Install UV and ensure it is accessible from the command line before using uv-global-wrapper."
