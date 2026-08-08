@@ -20,9 +20,9 @@ def main():
         sub = parser.add_subparsers(dest="command")
 
         activate.register(sub)
+        list.register(sub)
         create.register(sub)
         delete.register(sub)
-        list.register(sub)
         makeproject.register(sub)
         setup.register(sub)
 
