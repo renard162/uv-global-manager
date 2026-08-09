@@ -45,13 +45,28 @@ def repository_path(abs_path=True) -> Path:
     return resources_path(abs_path) / "Repository"
 
 
-def venv_script_path(venv_name: str, abs_path=True) -> Path | None:
+def venv_script_path(venv_name: str, abs_path=True) -> Path:
     os_name = os.name
     if os_name == "posix":
         return venvs_root_path(abs_path) / venv_name / "bin"
 
     if os_name == "nt":
         return venvs_root_path(abs_path) / venv_name / "Scripts"
+
+    return Path("")
+
+
+def path_as_posix(base_path: Path) -> str:
+    return base_path.as_posix()
+
+
+def path_as_windows(base_path: Path) -> str:
+    return base_path.as_posix().replace("/", "\\")
+
+
+def path_as_windows_bash(base_path: Path) -> str:
+    path_str = base_path.as_posix().replace(":", "").lower()
+    return f"/{path_str}"
 
 
 def get_parent_shell() -> tuple[str, str]:
@@ -71,17 +86,9 @@ def get_parent_shell() -> tuple[str, str]:
     return shell_name, shell_family
 
 
-def path_as_posix(base_path: Path) -> str:
-    return base_path.as_posix()
-
-
-def path_as_windows(base_path: Path) -> str:
-    return base_path.as_posix().replace("/", "\\")
-
-
 def get_script_extension(shell_family: str) -> str:
     extension_dict = {
-        "posix": ".sh",
+        "posix": "",
         "c_shell": ".csh",
         "fish": ".fish",
         "powershell": ".ps1",
