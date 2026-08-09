@@ -9,6 +9,7 @@ from ..utils import (
     get_parent_shell,
     path_as_posix,
     path_as_windows,
+    print_warning,
     venv_script_path,
 )
 
@@ -24,6 +25,12 @@ def register(subparsers):
         "name",
         nargs="?",
         help="Name of the virtual environment to activate.",
+    )
+
+    parser.add_argument(
+        "--hook",
+        action="store_true",
+        help=argparse.SUPPRESS,
     )
 
     parser.set_defaults(
@@ -62,9 +69,15 @@ def activate_run(args: argparse.Namespace):
         "xonsh": f'source "~/{script_path}"',
     }
 
-    activation_command = activation_commands_dict[shell_family]
+    if not args.hook:
+        print_warning(
+            "The shell hook is not installed.\n"
+            "You may run 'uvg setup' for instructions on installing the shell hook.\n"
+            "Copy and paste the generated command to activate the virtual environment manually.\n"
+        )
 
     # The printed command is executed by the hook
+    activation_command = activation_commands_dict[shell_family]
     print(activation_command)
 
 

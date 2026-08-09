@@ -102,5 +102,5 @@ def which_path_only(command: str) -> str | None:
             os.environ["NoDefaultCurrentDirectoryInExePath"] = old_value
 
 
-def print_warning(message: str, pre_message=""):
-    print(f"{pre_message}Warning: {message}", file=sys.stderr)
+def print_warning(message: str):
+    print(message, file=sys.stderr)

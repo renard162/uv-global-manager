@@ -57,11 +57,11 @@ def gen_posix_hook_script() -> str:
     return dedent("""
         uvg() {
             if [ "$1" = "activate" ] &&
-               [ -n "$2" ] &&
-               [ "$2" != "-h" ] &&
-               [ "$2" != "--help" ]; then
+            [ -n "$2" ] &&
+            [ "$2" != "-h" ] &&
+            [ "$2" != "--help" ]; then
 
-                activation_command="$(command uvg activate "$2")" || return 1
+                activation_command="$(command uvg activate "$2" --hook)" || return 1
 
                 eval "$activation_command"
                 return $?
@@ -74,7 +74,7 @@ def gen_posix_hook_script() -> str:
 
 def gen_cshell_hook_script() -> str:
     return dedent(r"""
-        alias uvg 'if ("\!:1" == "activate" && "\!:2" != "" && "\!:2" != "-h" && "\!:2" != "--help") then; eval `\uvg activate "\!:2"`; else; \uvg \!*; endif'
+        alias uvg 'if ("!:1" == "activate" && "!:2" != "" && "!:2" != "-h" && "!:2" != "--help") then; eval `\uvg activate "\!:2" --hook`; else; \uvg !\*; endif'
     """).strip()
 
 
@@ -84,7 +84,7 @@ def gen_fish_hook_script() -> str:
             if test (count $argv) -ge 2
                 if test "$argv[1]" = "activate"
                     if test "$argv[2]" != "-h"; and test "$argv[2]" != "--help"
-                        set -l activation_command (command uvg activate "$argv[2]")
+                        set -l activation_command (command uvg activate "$argv[2]" --hook)
                         or return $status
 
                         eval $activation_command
@@ -109,7 +109,7 @@ def gen_powershell_hook_script() -> str:
                 $args[1] -ne "-h" -and
                 $args[1] -ne "--help"
             ) {
-                $activation_command = & $uvg_command activate $args[1]
+                $activation_command = & $uvg_command activate $args[1] --hook
 
                 if ($LASTEXITCODE -ne 0) {
                     return
@@ -134,7 +134,7 @@ def gen_cmd_hook_script() -> str:
             if /i "%~2"=="--help" goto :passthrough
 
             for /f "delims=" %%A in (
-                'uvg.exe activate "%~2"'
+                'uvg.exe activate "%~2" --hook'
             ) do call %%A
 
             exit /b %errorlevel%
@@ -210,7 +210,7 @@ def gen_nushell_hook_script() -> str:
                 $args.1 != "--help"
             ) {{
                 try {{
-                    ^uvg ...$args | ignore
+                    ^uvg activate $args.1 --hook | ignore
                 }} catch {{
                     return
                 }}
@@ -236,7 +236,7 @@ def gen_xonsh_hook_script() -> str:
                 and args[1] not in ("-h", "--help")
             ):
                 result = subprocess.run(
-                    ["uvg", "activate", *args[1:]],
+                    ["uvg", "activate", *args[1:], "--hook"],
                     capture_output=True,
                     text=True,
                 )

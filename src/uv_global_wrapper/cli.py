@@ -58,4 +58,4 @@ def integrity_check():
         )
 
     if which("uvg") is None:
-        print_warning("UVG is not available in PATH.", pre_message="\n")
+        print_warning("\nWarning: UVG is not available in PATH.\n")
