@@ -50,8 +50,13 @@ def gen_shell_hook_script(shell_family: str) -> str:
 def gen_posix_hook_script() -> str:
     return dedent("""
         uvg() {
-            if [ "$1" = "activate" ]; then
+            if [ "$1" = "activate" ] &&
+               [ -n "$2" ] &&
+               [ "$2" != "-h" ] &&
+               [ "$2" != "--help" ]; then
+
                 activation_command="$(command uvg activate "$2")" || return 1
+
                 eval "$activation_command"
                 return $?
             fi
@@ -63,19 +68,23 @@ def gen_posix_hook_script() -> str:
 
 def gen_c_shell_hook_script() -> str:
     return dedent(r"""
-        alias uvg 'if ("\!:1" == "activate") then; eval `\uvg activate "\!:2"`; else; \uvg \!*; endif'
+        alias uvg 'if ("\!:1" == "activate" && "\!:2" != "" && "\!:2" != "-h" && "\!:2" != "--help") then; eval `\uvg activate "\!:2"`; else; \uvg \!*; endif'
     """).strip()
 
 
 def gen_fish_hook_script() -> str:
     return dedent("""
         function uvg
-            if test "$argv[1]" = "activate"
-                set -l activation_command (command uvg activate "$argv[2]")
-                or return $status
+            if test (count $argv) -ge 2
+                if test "$argv[1]" = "activate"
+                    if test "$argv[2]" != "-h"; and test "$argv[2]" != "--help"
+                        set -l activation_command (command uvg activate "$argv[2]")
+                        or return $status
 
-                eval $activation_command
-                return $status
+                        eval $activation_command
+                        return $status
+                    end
+                end
             end
 
             command uvg $argv
@@ -88,7 +97,12 @@ def gen_powershell_hook_script() -> str:
         $uvg_command = (Get-Command uvg -CommandType Application).Source
 
         function uvg {
-            if ($args[0] -eq "activate") {
+            if (
+                $args.Count -ge 2 -and
+                $args[0] -eq "activate" -and
+                $args[1] -ne "-h" -and
+                $args[1] -ne "--help"
+            ) {
                 $activation_command = & $uvg_command activate $args[1]
 
                 if ($LASTEXITCODE -ne 0) {
@@ -108,7 +122,11 @@ def gen_cmd_hook_script() -> str:
     return dedent(r"""
         @echo off
 
-        if "%~1"=="activate" (
+        if /i "%~1"=="activate" (
+            if "%~2"=="" goto :passthrough
+            if /i "%~2"=="-h" goto :passthrough
+            if /i "%~2"=="--help" goto :passthrough
+
             for /f "delims=" %%A in (
                 'uvg.exe activate "%~2"'
             ) do call %%A
@@ -116,6 +134,7 @@ def gen_cmd_hook_script() -> str:
             exit /b %errorlevel%
         )
 
+        :passthrough
         uvg.exe %*
     """).strip()
 
@@ -123,12 +142,12 @@ def gen_cmd_hook_script() -> str:
 def gen_nushell_hook_script() -> str:
     return dedent("""
         def --env uvg [...args] {
-            if ($args | is-empty) {
-                ^uvg
-                return
-            }
-
-            if ($args.0 == "activate") {
+            if (
+                ($args | length) >= 2 and
+                $args.0 == "activate" and
+                $args.1 != "-h" and
+                $args.1 != "--help"
+            ) {
                 let activation_file = (mktemp)
 
                 ^uvg activate $args.1 | save --force $activation_file
@@ -146,9 +165,14 @@ def gen_nushell_hook_script() -> str:
 def gen_xonsh_hook_script() -> str:
     return dedent("""
         import subprocess
+        import sys
 
         def _uvg(args):
-            if args and args[0] == "activate":
+            if (
+                len(args) >= 2
+                and args[0] == "activate"
+                and args[1] not in ("-h", "--help")
+            ):
                 result = subprocess.run(
                     ["uvg", "activate", *args[1:]],
                     capture_output=True,
@@ -156,7 +180,7 @@ def gen_xonsh_hook_script() -> str:
                 )
 
                 if result.returncode != 0:
-                    print(result.stderr, end="", file=__import__("sys").stderr)
+                    print(result.stderr, end="", file=sys.stderr)
                     return result.returncode
 
                 __xonsh__.execer.exec(result.stdout)
