@@ -110,11 +110,11 @@ def gen_powershell_hook_script() -> str:
                 $activation_command = & $uvg_command activate $args[1]
 
                 if ($LASTEXITCODE -ne 0) {
-                    return $LASTEXITCODE
+                    return
                 }
 
                 Invoke-Expression $activation_command
-                return $LASTEXITCODE
+                return
             }
 
             & $uvg_command @args
