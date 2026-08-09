@@ -10,20 +10,54 @@ from .utils import (
     venvs_root_path,
 )
 
+COMMENT_MARKERS = {
+    "posix": "#",
+    "cshell": "#",
+    "fish": "#",
+    "powershell": "#",
+    "cmd": "REM",
+    "nushell": "#",
+    "xonsh": "#",
+}
+
+HOOK_SCRIPTS = {
+    "posix": "uvg-posix.sh",
+    "cshell": "uvg-cshell.csh",
+    "fish": "uvg-fish.fish",
+    "powershell": "uvg-powershell.ps1",
+    "cmd": "uvg-cmd.bat",
+    "nushell": "uvg-nushell.nu",
+    "xonsh": "uvg-xonsh.xsh",
+}
+
+
+def gen_shell_hook_call_insertion(shell_family: str) -> str:
+    comment = COMMENT_MARKERS.get(shell_family, None)
+
+    if comment is None:
+        raise ShellDetectionFailure(f"Unsupported shell family: {shell_family}")
+
+    return (
+        f"{comment} uv-global-wrapper-hook-call-init\n"
+        f"{gen_shell_hook_call(shell_family)}\n"
+        f"{comment} uv-global-wrapper-hook-call-end"
+    )
+
 
 def gen_shell_hook_call(shell_family: str) -> str:
     hook_script_location = hook_script_path(abs_path=False)
     posix_location = path_as_posix(hook_script_location)
     windows_location = path_as_windows(hook_script_location)
 
+    hook_script = HOOK_SCRIPTS.get(shell_family)
     hook_calls_dict = {
-        "posix": f'source "$HOME/{posix_location}/uvg-posix.sh"',
-        "cshell": f'source "$HOME/{posix_location}/uvg-cshell.csh"',
-        "fish": f'source "$HOME/{posix_location}/uvg-fish.fish"',
-        "powershell": f'. "$HOME\\{windows_location}\\uvg-powershell.ps1"',
-        "cmd": f'doskey uvg=call "%USERPROFILE%\\{windows_location}\\uvg-cmd.bat" $*',
-        "nushell": f'source ($nu.home-dir | path join "{posix_location}/uvg-nushell.nu")',
-        "xonsh": f'source "~/{posix_location}/uvg-xonsh.xsh"',
+        "posix": f'source "$HOME/{posix_location}/{hook_script}"',
+        "cshell": f'source "$HOME/{posix_location}/{hook_script}"',
+        "fish": f'source "$HOME/{posix_location}/{hook_script}"',
+        "powershell": f'. "$HOME\\{windows_location}\\{hook_script}"',
+        "cmd": f'doskey uvg=call "%USERPROFILE%\\{windows_location}\\{hook_script}" $*',
+        "nushell": f'source ($nu.home-dir | path join "{posix_location}/{hook_script}")',
+        "xonsh": f'source "~/{posix_location}/{hook_script}"',
     }
 
     hook_call = hook_calls_dict.get(shell_family, None)
