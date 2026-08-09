@@ -2,7 +2,7 @@ from textwrap import dedent
 
 from shellingham import ShellDetectionFailure
 
-from .utils import (
+from ..utils import (
     hook_script_path,
     path_as_posix,
     path_as_windows,

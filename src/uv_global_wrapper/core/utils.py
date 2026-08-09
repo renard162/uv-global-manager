@@ -7,8 +7,6 @@ from pathlib import Path
 
 from shellingham import ShellDetectionFailure, detect_shell
 
-BASE_PYTHON_VERSION = "3.13"
-
 ANY_OS_SHELLS = {
     "bash": "posix",
     "pwsh": "powershell",
