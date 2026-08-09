@@ -5,7 +5,9 @@ from pathlib import Path
 
 from shellingham import ShellDetectionFailure, detect_shell
 
+
 BASE_PYTHON_VERSION = "3.13"
+
 ANY_OS_SHELLS = {
     "bash": "posix",
     "ksh": "posix",
@@ -18,12 +20,12 @@ ANY_OS_SHELLS = {
     "nu": "nushell",
 }
 
+POSIX_ONLY_SHELLS = {}
+
 WINDOWS_ONLY_SHELLS = {
     "cmd": "cmd",
     "xonsh": "xonsh",
 }
-
-POSIX_ONLY_SHELLS = {}
 
 
 def venvs_root_path(abs_path=True) -> Path:
@@ -74,10 +76,10 @@ def get_parent_shell() -> tuple[str, str]:
     shell_name, _ = detect_shell()
 
     supported_shells = ANY_OS_SHELLS.copy()
-    if os_name == "nt":
-        supported_shells.update(WINDOWS_ONLY_SHELLS)
-    elif os_name == "posix":
+    if os_name == "posix":
         supported_shells.update(POSIX_ONLY_SHELLS)
+    elif os_name == "nt":
+        supported_shells.update(WINDOWS_ONLY_SHELLS)
 
     if shell_name not in supported_shells:
         raise ShellDetectionFailure(f"Unsupported command shell: {shell_name}")
