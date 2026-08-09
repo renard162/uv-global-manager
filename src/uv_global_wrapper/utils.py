@@ -9,21 +9,22 @@ BASE_PYTHON_VERSION = "3.13"
 
 ANY_OS_SHELLS = {
     "bash": "posix",
+    "powershell": "powershell",
+    "pwsh": "powershell",
+    "nu": "nushell",
+    "xonsh": "xonsh",
+}
+
+POSIX_ONLY_SHELLS = {
     "ksh": "posix",
     "zsh": "posix",
     "csh": "cshell",
     "tcsh": "cshell",
     "fish": "fish",
-    "powershell": "powershell",
-    "pwsh": "powershell",
-    "nu": "nushell",
 }
-
-POSIX_ONLY_SHELLS = {}
 
 WINDOWS_ONLY_SHELLS = {
     "cmd": "cmd",
-    "xonsh": "xonsh",
 }
 
 
