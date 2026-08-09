@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import os
+import shutil
 import sys
 from pathlib import Path
-from shutil import which
 
 from shellingham import ShellDetectionFailure, detect_shell
 
@@ -97,13 +97,13 @@ def get_parent_shell() -> tuple[str, str]:
 
 def which_path_only(command: str) -> str | None:
     if os.name == "posix":
-        return which(command)
+        return shutil.which(command)
 
     old_value = os.environ.get("NoDefaultCurrentDirectoryInExePath")
 
     try:
         os.environ["NoDefaultCurrentDirectoryInExePath"] = "1"
-        return which(command)
+        return shutil.which(command)
     finally:
         if old_value is None:
             os.environ.pop("NoDefaultCurrentDirectoryInExePath", None)
