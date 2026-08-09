@@ -27,7 +27,7 @@ POSIX_ONLY_SHELLS = {}
 
 
 def venvs_root_path(abs_path=True) -> Path:
-    root_folder = Path(".uvEnvs")
+    root_folder = Path("uvEnvs")
     if abs_path:
         return Path.home() / root_folder
     return root_folder
