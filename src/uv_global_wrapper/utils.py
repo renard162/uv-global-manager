@@ -61,6 +61,15 @@ def venv_script_path(venv_name: str, abs_path=True) -> Path:
     return venvs_root_path(abs_path) / venv_name / venv_script_folder_name()
 
 
+def venv_interpreter_path(venv_name: str, abs_path=True) -> Path:
+    venv_scripts = venv_script_path(venv_name, abs_path)
+    interpreter_dict = {
+        "posix": venv_scripts / "python",
+        "nt": venv_scripts / "python.exe",
+    }
+    return interpreter_dict.get(os.name, Path("__error"))
+
+
 def path_as_posix(base_path: Path) -> str:
     return base_path.as_posix()
 
