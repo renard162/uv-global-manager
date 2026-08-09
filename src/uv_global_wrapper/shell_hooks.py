@@ -16,12 +16,12 @@ def gen_shell_hook_call(shell_family: str) -> str:
 
     hook_calls_dict = {
         "posix": f'source "$HOME/{posix_location}/uvg-posix.sh"',
-        "c_shell": f'source "$HOME/{posix_location}/uvg-cshell.csh"',
-        "fish": f'source "$HOME/{posix_location}/uvg.fish"',
+        "cshell": f'source "$HOME/{posix_location}/uvg-cshell.csh"',
+        "fish": f'source "$HOME/{posix_location}/uvg-fish.fish"',
         "powershell": f'. "$HOME\\{windows_location}\\uvg-powershell.ps1"',
         "cmd": f'doskey uvg=call "%USERPROFILE%\\{windows_location}\\uvg-cmd.bat" $*',
-        "nushell": f'source "$nu.home-path/{posix_location}/uvg.nu"',
-        "xonsh": f'source "$HOME/{posix_location}/uvg.xsh"',
+        "nushell": f'source "$nu.home-path/{posix_location}/uvg-nushell.nu"',
+        "xonsh": f'source "$HOME/{posix_location}/uvg-xonsh.xsh"',
     }
 
     hook_call = hook_calls_dict.get(shell_family, None)
@@ -35,7 +35,7 @@ def gen_shell_hook_call(shell_family: str) -> str:
 def gen_shell_hook_script(shell_family: str) -> str:
     hook_scripts_dict = {
         "posix": gen_posix_hook_script,
-        "c_shell": gen_c_shell_hook_script,
+        "cshell": gen_cshell_hook_script,
         "fish": gen_fish_hook_script,
         "powershell": gen_powershell_hook_script,
         "cmd": gen_cmd_hook_script,
@@ -70,7 +70,7 @@ def gen_posix_hook_script() -> str:
     """).strip()
 
 
-def gen_c_shell_hook_script() -> str:
+def gen_cshell_hook_script() -> str:
     return dedent(r"""
         alias uvg 'if ("\!:1" == "activate" && "\!:2" != "" && "\!:2" != "-h" && "\!:2" != "--help") then; eval `\uvg activate "\!:2"`; else; \uvg \!*; endif'
     """).strip()

@@ -54,7 +54,7 @@ def activate_run(args: argparse.Namespace):
 
     activation_commands_dict = {
         "posix": f'source "$HOME/{script_path}"',
-        "c_shell": f'source "$HOME/{script_path}"',
+        "cshell": f'source "$HOME/{script_path}"',
         "fish": f'source "$HOME/{script_path}"',
         "powershell": f'. "$HOME\\{script_path}"',
         "cmd": f'call "%USERPROFILE%\\{script_path}"',
@@ -71,7 +71,7 @@ def activate_run(args: argparse.Namespace):
 def get_activation_script_extension(shell_family: str) -> str:
     extension_dict = {
         "posix": "",
-        "c_shell": ".csh",
+        "cshell": ".csh",
         "fish": ".fish",
         "powershell": ".ps1",
         "cmd": ".bat",
