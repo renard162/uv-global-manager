@@ -6,6 +6,24 @@ from pathlib import Path
 from shellingham import ShellDetectionFailure, detect_shell
 
 BASE_PYTHON_VERSION = "3.13"
+ANY_OS_SHELLS = {
+    "bash": "posix",
+    "ksh": "posix",
+    "zsh": "posix",
+    "csh": "c_shell",
+    "tcsh": "c_shell",
+    "fish": "fish",
+    "powershell": "powershell",
+    "pwsh": "powershell",
+    "nu": "nushell",
+}
+
+WINDOWS_ONLY_SHELLS = {
+    "cmd": "cmd",
+    "xonsh": "xonsh",
+}
+
+POSIX_ONLY_SHELLS = {}
 
 
 def venvs_root_path() -> Path:
@@ -29,30 +47,21 @@ def venv_script_path(venv_name: str) -> Path | None:
         return venvs_root_path() / venv_name / "Scripts"
 
 
-def get_parent_shell() -> str:
+def get_parent_shell() -> tuple[str, str]:
     os_name = os.name
     shell_name, _ = detect_shell()
 
-    supported_shells = [
-        "bash",
-        "ksh",
-        "zsh",
-        "csh",
-        "tcsh",
-        "fish",
-        "powershell",
-        "pwsh",
-        "nu",
-    ]
+    supported_shells = ANY_OS_SHELLS.copy()
     if os_name == "nt":
-        supported_shells.extend(["cmd", "xonsh"])
+        supported_shells.update(WINDOWS_ONLY_SHELLS)
     elif os_name == "posix":
-        supported_shells.extend([])
+        supported_shells.update(POSIX_ONLY_SHELLS)
 
     if shell_name not in supported_shells:
         raise ShellDetectionFailure(f"Unsupported command shell: {shell_name}")
 
-    return shell_name
+    shell_family = supported_shells[shell_name]
+    return shell_name, shell_family
 
 
 def get_script_extension(shell_name: str) -> str:
