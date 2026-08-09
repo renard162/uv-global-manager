@@ -39,7 +39,7 @@ def main():
         print("\nOperation cancelled.", file=sys.stderr)
         raise SystemExit(130)
 
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         print(f"Error: {exc}", file=sys.stderr)
         raise SystemExit(1)
 

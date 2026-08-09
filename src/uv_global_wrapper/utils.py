@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
-from shellingham import detect_shell, ShellDetectionFailure
+from shellingham import ShellDetectionFailure, detect_shell
 
 BASE_PYTHON_VERSION = "3.13"
 
@@ -18,7 +20,7 @@ def repository_path() -> Path:
     return resources_path() / "Repository"
 
 
-def venv_script_path(venv_name: str) -> Path:
+def venv_script_path(venv_name: str) -> Path | None:
     os_name = os.name
     if os_name == "posix":
         return venvs_root_path() / venv_name / "bin"
