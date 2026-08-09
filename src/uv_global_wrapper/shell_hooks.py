@@ -171,16 +171,8 @@ def gen_nushell_hook_script() -> str:
                 deactivate
             }}
 
-            let venv_path = (
-                $nu.home-dir
-                | path join "{root_folder}" $venv_name
-            )
-
-            let scripts_path = (
-                $venv_path
-                | path join "{script_folder}"
-            )
-
+            let venv_path = ($nu.home-dir | path join "{root_folder}" $venv_name)
+            let scripts_path = ($venv_path | path join "{script_folder}")
             let old_path = $env.PATH
 
             let old_prompt_command = if "PROMPT_COMMAND" in $env {{
