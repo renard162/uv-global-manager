@@ -14,19 +14,19 @@ from ..utils import (
 
 
 def register(subparsers):
-
     parser = subparsers.add_parser("activate")
 
     parser.add_argument("name")
 
-    parser.set_defaults(func=activate_run)
+    parser.set_defaults(
+        func=activate_run,
+        parser=parser,
+    )
 
 
 def activate_run(args: argparse.Namespace):
-    parser: argparse.ArgumentParser = args.parser
-
     if args.name is None:
-        parser.print_help()
+        args.parser.print_help()
         return
 
     _, shell_family = get_parent_shell()
@@ -38,12 +38,23 @@ def activate_run(args: argparse.Namespace):
             f"Virtual environment '{args.name}' was not found or is corrupted."
         )
 
-    os_name = os.name
-    if os_name == "nt" and shell_family == "posix":
-        activation_script = path_as_windows_bash(activation_script)
-    elif os_name == "nt":
-        activation_script = path_as_windows(activation_script)
+    if (os.name == "nt") and (shell_family == "posix"):
+        script_path = path_as_windows_bash(activation_script)
+    elif os.name == "nt":
+        script_path = path_as_windows(activation_script)
     else:
-        activation_script = path_as_posix(activation_script)
+        script_path = path_as_posix(activation_script)
 
-    print(activation_script)
+    activation_commands_dict = {
+        "posix": f'source "{script_path}"',
+        "c_shell": f'source "{script_path}"',
+        "fish": f'source "{script_path}"',
+        "powershell": f'. "{script_path}"',
+        "cmd": f'call "{script_path}"',
+        "nushell": f'source "{script_path}"',
+        "xonsh": f'source "{script_path}"',
+    }
+
+    activation_command = activation_commands_dict.get(shell_family, None)
+
+    print(activation_command)
