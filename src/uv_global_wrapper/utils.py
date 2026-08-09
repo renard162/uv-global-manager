@@ -26,28 +26,32 @@ WINDOWS_ONLY_SHELLS = {
 POSIX_ONLY_SHELLS = {}
 
 
-def venvs_root_path(complete_path=True) -> Path:
+def venvs_root_path(abs_path=True) -> Path:
     root_folder = Path(".uvEnvs")
-    if complete_path:
+    if abs_path:
         return Path.home() / root_folder
     return root_folder
 
 
-def resources_path(complete_path=True) -> Path:
-    return venvs_root_path(complete_path) / ".resources"
+def resources_path(abs_path=True) -> Path:
+    return venvs_root_path(abs_path) / ".resources"
 
 
-def repository_path(complete_path=True) -> Path:
-    return resources_path(complete_path) / "Repository"
+def hook_script_path(abs_path=True) -> Path:
+    return venvs_root_path(abs_path) / "Hook_scripts"
 
 
-def venv_script_path(venv_name: str, complete_path=True) -> Path | None:
+def repository_path(abs_path=True) -> Path:
+    return resources_path(abs_path) / "Repository"
+
+
+def venv_script_path(venv_name: str, abs_path=True) -> Path | None:
     os_name = os.name
     if os_name == "posix":
-        return venvs_root_path(complete_path) / venv_name / "bin"
+        return venvs_root_path(abs_path) / venv_name / "bin"
 
     if os_name == "nt":
-        return venvs_root_path(complete_path) / venv_name / "Scripts"
+        return venvs_root_path(abs_path) / venv_name / "Scripts"
 
 
 def get_parent_shell() -> tuple[str, str]:
