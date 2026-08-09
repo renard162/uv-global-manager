@@ -58,7 +58,7 @@ def activate_run(args: argparse.Namespace):
         "fish": f'source "$HOME/{script_path}"',
         "powershell": f'. "$HOME\\{script_path}"',
         "cmd": f'call "%USERPROFILE%\\{script_path}"',
-        "nushell": f'source "$nu.home-path/{script_path}"',
+        "nushell": f'overlay use ($nu.home-dir | path join "{script_path}")',
         "xonsh": f'source "$HOME/{script_path}"',
     }
 

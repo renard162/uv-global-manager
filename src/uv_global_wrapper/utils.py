@@ -46,15 +46,16 @@ def repository_path(abs_path=True) -> Path:
     return resources_path(abs_path) / "Repository"
 
 
+def venv_script_folder_name() -> str:
+    folder_name_dict = {
+        "posix": "bin",
+        "nt": "Scripts",
+    }
+    return folder_name_dict.get(os.name, "")
+
+
 def venv_script_path(venv_name: str, abs_path=True) -> Path:
-    os_name = os.name
-    if os_name == "posix":
-        return venvs_root_path(abs_path) / venv_name / "bin"
-
-    if os_name == "nt":
-        return venvs_root_path(abs_path) / venv_name / "Scripts"
-
-    return Path("")
+    return venvs_root_path(abs_path) / venv_name / venv_script_folder_name()
 
 
 def path_as_posix(base_path: Path) -> str:
