@@ -14,9 +14,17 @@ from ..utils import (
 
 
 def register(subparsers):
-    parser = subparsers.add_parser("activate")
+    parser = subparsers.add_parser(
+        "activate",
+        help="Activate a global virtual environment.",
+        description="Activates a global virtual environment.",
+    )
 
-    parser.add_argument("name")
+    parser.add_argument(
+        "name",
+        nargs="?",
+        help="Name of the virtual environment to activate.",
+    )
 
     parser.set_defaults(
         func=activate_run,
@@ -55,6 +63,7 @@ def activate_run(args: argparse.Namespace):
         "xonsh": f'source "{script_path}"',
     }
 
-    activation_command = activation_commands_dict.get(shell_family, None)
+    activation_command = activation_commands_dict[shell_family]
 
+    # Printed command is executed by hook
     print(activation_command)
