@@ -65,11 +65,6 @@ def path_as_windows(base_path: Path) -> str:
     return base_path.as_posix().replace("/", "\\")
 
 
-def path_as_windows_bash(base_path: Path) -> str:
-    path_str = base_path.as_posix().replace(":", "").lower()
-    return f"/{path_str}"
-
-
 def get_parent_shell() -> tuple[str, str]:
     os_name = os.name
     shell_name, _ = detect_shell()
@@ -85,21 +80,3 @@ def get_parent_shell() -> tuple[str, str]:
 
     shell_family = supported_shells[shell_name]
     return shell_name, shell_family
-
-
-def get_script_extension(shell_family: str) -> str:
-    extension_dict = {
-        "posix": "",
-        "c_shell": ".csh",
-        "fish": ".fish",
-        "powershell": ".ps1",
-        "cmd": ".bat",
-        "nushell": ".nu",
-        "xonsh": ".xsh",
-    }
-    extension = extension_dict.get(shell_family, None)
-
-    if extension is None:
-        raise ShellDetectionFailure(f"Unsupported shell family: {shell_family}")
-
-    return extension

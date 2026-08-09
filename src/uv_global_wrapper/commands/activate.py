@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import argparse
-import os
+from pathlib import Path
+
+from shellingham import ShellDetectionFailure
 
 from ..utils import (
     get_parent_shell,
-    get_script_extension,
     path_as_posix,
     path_as_windows,
-    path_as_windows_bash,
     venv_script_path,
 )
 
@@ -38,32 +38,49 @@ def activate_run(args: argparse.Namespace):
         return
 
     _, shell_family = get_parent_shell()
-    script_extension = get_script_extension(shell_family)
-    activation_script = venv_script_path(args.name) / f"activate{script_extension}"
+    ext = get_activation_script_extension(shell_family)
+    abs_activation_script = venv_script_path(args.name) / f"activate{ext}"
 
-    if not activation_script.is_file():
+    if not abs_activation_script.is_file():
         raise FileNotFoundError(
-            f"Virtual environment '{args.name}' was not found or is corrupted."
+            f"Virtual environment '{args.name}' or activation script '{abs_activation_script.name}' does not exist."
         )
 
-    if (os.name == "nt") and (shell_family == "posix"):
-        script_path = path_as_windows_bash(activation_script)
-    elif os.name == "nt":
+    activation_script = abs_activation_script.relative_to(Path.home())
+    if shell_family in ("cmd", "powershell"):
         script_path = path_as_windows(activation_script)
     else:
         script_path = path_as_posix(activation_script)
 
     activation_commands_dict = {
-        "posix": f'source "{script_path}"',
-        "c_shell": f'source "{script_path}"',
-        "fish": f'source "{script_path}"',
-        "powershell": f'. "{script_path}"',
-        "cmd": f'call "{script_path}"',
-        "nushell": f'source "{script_path}"',
-        "xonsh": f'source "{script_path}"',
+        "posix": f'source "$HOME/{script_path}"',
+        "c_shell": f'source "$HOME/{script_path}"',
+        "fish": f'source "$HOME/{script_path}"',
+        "powershell": f'. "$HOME\\{script_path}"',
+        "cmd": f'call "%USERPROFILE%\\{script_path}"',
+        "nushell": f'source "$nu.home-path/{script_path}"',
+        "xonsh": f'source "$HOME/{script_path}"',
     }
 
     activation_command = activation_commands_dict[shell_family]
 
     # Printed command is executed by hook
     print(activation_command)
+
+
+def get_activation_script_extension(shell_family: str) -> str:
+    extension_dict = {
+        "posix": "",
+        "c_shell": ".csh",
+        "fish": ".fish",
+        "powershell": ".ps1",
+        "cmd": ".bat",
+        "nushell": ".nu",
+        "xonsh": ".xsh",
+    }
+    extension = extension_dict.get(shell_family, None)
+
+    if extension is None:
+        raise ShellDetectionFailure(f"Unsupported shell family: {shell_family}")
+
+    return extension
