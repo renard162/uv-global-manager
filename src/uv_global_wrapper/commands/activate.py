@@ -9,7 +9,7 @@ from ..utils import (
     get_parent_shell,
     path_as_posix,
     path_as_windows,
-    print_warning,
+    print_stderr,
     venv_script_path,
 )
 
@@ -70,7 +70,7 @@ def activate_run(args: argparse.Namespace):
     }
 
     if not args.hook:
-        print_warning(
+        print_stderr(
             "The shell hook may not be installed, or the command may have been invoked using a command other than 'uvg'.\n"
             "You may run 'uvg setup' for instructions on installing the shell hook.\n"
             "Make sure to use exactly 'uvg' to invoke the command.\n"
