@@ -59,7 +59,7 @@ def activate_run(args: argparse.Namespace):
         "powershell": f'. "$HOME\\{script_path}"',
         "cmd": f'call "%USERPROFILE%\\{script_path}"',
         "nushell": f'overlay use ($nu.home-dir | path join "{script_path}")',
-        "xonsh": f'source "$HOME/{script_path}"',
+        "xonsh": f'source "~/{script_path}"',
     }
 
     activation_command = activation_commands_dict[shell_family]

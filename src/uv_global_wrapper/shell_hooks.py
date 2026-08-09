@@ -23,7 +23,7 @@ def gen_shell_hook_call(shell_family: str) -> str:
         "powershell": f'. "$HOME\\{windows_location}\\uvg-powershell.ps1"',
         "cmd": f'doskey uvg=call "%USERPROFILE%\\{windows_location}\\uvg-cmd.bat" $*',
         "nushell": f'source ($nu.home-dir | path join "{posix_location}/uvg-nushell.nu")',
-        "xonsh": f'source "$HOME/{posix_location}/uvg-xonsh.xsh"',
+        "xonsh": f'source "~/{posix_location}/uvg-xonsh.xsh"',
     }
 
     hook_call = hook_calls_dict.get(shell_family, None)
