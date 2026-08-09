@@ -14,34 +14,34 @@ from .commands import (
 
 
 def main():
-    try:
-        integrity_check()
+    # try:
+    integrity_check()
 
-        parser = argparse.ArgumentParser(prog="avg")
-        sub = parser.add_subparsers(dest="command")
+    parser = argparse.ArgumentParser(prog="avg")
+    sub = parser.add_subparsers(dest="command")
 
-        activate.register(sub)
-        list.register(sub)
-        create.register(sub)
-        delete.register(sub)
-        makeproject.register(sub)
-        setup.register(sub)
+    activate.register(sub)
+    list.register(sub)
+    create.register(sub)
+    delete.register(sub)
+    makeproject.register(sub)
+    setup.register(sub)
 
-        args = parser.parse_args()
+    args = parser.parse_args()
 
-        if args.command is None:
-            parser.print_help()
-            return 0
+    if args.command is None:
+        parser.print_help()
+        return 0
 
-        return args.func(args)
+    return args.func(args)
 
-    except KeyboardInterrupt:
-        print("\nOperation cancelled.", file=sys.stderr)
-        raise SystemExit(130)
+    # except KeyboardInterrupt:
+    #     print("\nOperation cancelled.", file=sys.stderr)
+    #     raise SystemExit(130)
 
-    except Exception as exc:  # noqa: BLE001
-        print(f"Error: {exc}", file=sys.stderr)
-        raise SystemExit(1)
+    # except Exception as exc:  # noqa: BLE001
+    #     print(f"Error: {exc}", file=sys.stderr)
+    #     raise SystemExit(1)
 
 
 def integrity_check():
