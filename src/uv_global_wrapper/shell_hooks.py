@@ -2,13 +2,13 @@ from textwrap import dedent
 
 from shellingham import ShellDetectionFailure
 
-from .utils import hook_script_path
+from .utils import hook_script_path, path_as_posix, path_as_windows
 
 
-def gen_shell_hook_string(shell_family: str) -> str:
+def gen_shell_hook_call(shell_family: str) -> str:
     hook_script_location = hook_script_path(abs_path=False)
-    posix_location = hook_script_location.as_posix()
-    windows_location = posix_location.replace("/", "\\")
+    posix_location = path_as_posix(hook_script_location)
+    windows_location = path_as_windows(hook_script_location)
 
     hook_calls_dict = {
         "posix": f'source "$HOME/{posix_location}/uvg-posix.sh"',

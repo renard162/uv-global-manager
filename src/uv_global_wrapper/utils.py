@@ -38,7 +38,7 @@ def resources_path(abs_path=True) -> Path:
 
 
 def hook_script_path(abs_path=True) -> Path:
-    return venvs_root_path(abs_path) / "Hook_scripts"
+    return venvs_root_path(abs_path) / "Hook_Scripts"
 
 
 def repository_path(abs_path=True) -> Path:
@@ -69,6 +69,14 @@ def get_parent_shell() -> tuple[str, str]:
 
     shell_family = supported_shells[shell_name]
     return shell_name, shell_family
+
+
+def path_as_posix(base_path: Path) -> str:
+    return base_path.as_posix()
+
+
+def path_as_windows(base_path: Path) -> str:
+    return base_path.as_posix().replace("/", "\\")
 
 
 def get_script_extension(shell_name: str) -> str:
