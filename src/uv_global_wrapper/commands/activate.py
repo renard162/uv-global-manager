@@ -64,7 +64,7 @@ def activate_run(args: argparse.Namespace):
 
     activation_command = activation_commands_dict[shell_family]
 
-    # Printed command is executed by hook
+    # The printed command is executed by the hook
     print(activation_command)
 
 
