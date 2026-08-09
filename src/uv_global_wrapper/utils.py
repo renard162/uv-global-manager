@@ -54,7 +54,7 @@ def venv_script_folder_name() -> str:
         "posix": "bin",
         "nt": "Scripts",
     }
-    return folder_name_dict.get(os.name, "")
+    return folder_name_dict.get(os.name, "__error")
 
 
 def venv_script_path(venv_name: str, abs_path=True) -> Path:
