@@ -15,7 +15,7 @@ def gen_shell_hook_call(shell_family: str) -> str:
         "c_shell": f'source "$HOME/{posix_location}/uvg-cshell.csh"',
         "fish": f'source "$HOME/{posix_location}/uvg.fish"',
         "powershell": f'. "$HOME\\{windows_location}\\uvg-powershell.ps1"',
-        "cmd": f'doskey uvg=call "%USERPROFILE%\\{windows_location}\\uvg-cmd.cmd" $*',
+        "cmd": f'doskey uvg=call "%USERPROFILE%\\{windows_location}\\uvg-cmd.bat" $*',
         "nushell": f'source "$nu.home-path/{posix_location}/uvg.nu"',
         "xonsh": f'source "$HOME/{posix_location}/uvg.xsh"',
     }

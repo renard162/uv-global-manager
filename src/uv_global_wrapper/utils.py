@@ -79,23 +79,19 @@ def path_as_windows(base_path: Path) -> str:
     return base_path.as_posix().replace("/", "\\")
 
 
-def get_script_extension(shell_name: str) -> str:
+def get_script_extension(shell_family: str) -> str:
     extension_dict = {
-        "bash": "",
-        "ksh": "",
-        "zsh": "",
-        "csh": ".csh",
-        "tcsh": ".csh",
+        "posix": ".sh",
+        "c_shell": ".csh",
         "fish": ".fish",
-        "cmd": ".bat",
         "powershell": ".ps1",
-        "pwsh": ".ps1",
+        "cmd": ".bat",
+        "nushell": ".nu",
         "xonsh": ".xsh",
-        "nu": ".nu",
     }
-    extension = extension_dict.get(shell_name, None)
+    extension = extension_dict.get(shell_family, None)
 
     if extension is None:
-        raise ShellDetectionFailure(f"Unsupported command shell: {shell_name}")
+        raise ShellDetectionFailure(f"Unsupported shell family: {shell_family}")
 
     return extension
