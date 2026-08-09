@@ -5,6 +5,8 @@ import os
 import shutil
 from pathlib import Path
 
+from ..utils import venvs_root_path
+
 
 def register(subparsers: argparse._SubParsersAction):
     parser = subparsers.add_parser(
@@ -23,13 +25,11 @@ def register(subparsers: argparse._SubParsersAction):
 
 
 def delete_run(args: argparse.Namespace):
-    parser: argparse.ArgumentParser = args.parser
-
     if args.name is None:
-        parser.print_help()
+        args.parser.print_help()
         return
 
-    env_path = Path.home() / "uvEnvs" / args.name
+    env_path = venvs_root_path() / args.name
 
     if not env_path.is_dir():
         raise RuntimeError(f'Virtual environment "{args.name}" does not exist.')
