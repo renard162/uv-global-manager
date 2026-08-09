@@ -34,14 +34,11 @@ def get_parent_shell() -> str:
     shell_name, _ = detect_shell()
 
     supported_shells = [
-        "sh",
         "bash",
-        "dash",
-        "ash",
-        "csh",
-        "tcsh",
         "ksh",
         "zsh",
+        "csh",
+        "tcsh",
         "fish",
         "powershell",
         "pwsh",
@@ -56,3 +53,25 @@ def get_parent_shell() -> str:
         raise ShellDetectionFailure(f"Unsupported command shell: {shell_name}")
 
     return shell_name
+
+
+def get_script_extension(shell_name: str) -> str:
+    extension_dict = {
+        "bash": "",
+        "ksh": "",
+        "zsh": "",
+        "csh": "csh",
+        "tcsh": "csh",
+        "fish": "fish",
+        "cmd": "bat",
+        "powershell": "ps1",
+        "pwsh": "ps1",
+        "xonsh": "xsh",
+        "nu": "nu",
+    }
+    extension = extension_dict.get(shell_name, None)
+
+    if extension is None:
+        raise ShellDetectionFailure(f"Unsupported command shell: {shell_name}")
+
+    return extension
