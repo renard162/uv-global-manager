@@ -48,9 +48,9 @@ def integrity_check():
     if os.name not in ("nt", "posix"):
         raise OSError(f"Unsupported operating system: {os.name}")
 
-    if which("uv") is None or which("uvx") is None:
+    if (which("uv") is None) or (which("uvx") is None):
         raise FileNotFoundError(
-            "Required executable 'UV' was not found in the PATH. "
+            "Required executables 'UV' and 'UVX' was not found in the PATH. "
             "Install UV and ensure it is accessible from the command line before using uv-global-wrapper."
         )
 
