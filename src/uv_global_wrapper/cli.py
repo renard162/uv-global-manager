@@ -1,7 +1,6 @@
 import argparse
 import os
 import sys
-from shutil import which
 
 from .commands import (
     activate,
@@ -11,12 +10,12 @@ from .commands import (
     makeproject,
     setup,
 )
+from .utils import print_warning
+from .utils import which_path_only as which
 
 
 def main():
     # try:
-    integrity_check()
-
     parser = argparse.ArgumentParser(prog="avg")
     sub = parser.add_subparsers(dest="command")
 
@@ -31,6 +30,10 @@ def main():
 
     if args.command is None:
         parser.print_help()
+
+    integrity_check()
+
+    if args.command is None:
         return 0
 
     return args.func(args)
@@ -55,4 +58,4 @@ def integrity_check():
         )
 
     if which("uvg") is None:
-        raise RuntimeError("UVG is not available in PATH.")
+        print_warning("UVG is not available in PATH.", pre_message="\n")
