@@ -7,7 +7,7 @@ import stat
 import subprocess
 from pathlib import Path
 
-from ..utils import (
+from ..core.utils import (
     print_stderr,
     venv_interpreter_path,
     venv_script_path,

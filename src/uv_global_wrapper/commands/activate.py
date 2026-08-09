@@ -5,7 +5,7 @@ from pathlib import Path
 
 from shellingham import ShellDetectionFailure
 
-from ..utils import (
+from ..core.utils import (
     get_parent_shell,
     path_as_posix,
     path_as_windows,
