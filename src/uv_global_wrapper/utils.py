@@ -5,7 +5,6 @@ from pathlib import Path
 
 from shellingham import ShellDetectionFailure, detect_shell
 
-
 BASE_PYTHON_VERSION = "3.13"
 
 ANY_OS_SHELLS = {
@@ -40,7 +39,7 @@ def resources_path(abs_path=True) -> Path:
 
 
 def hook_script_path(abs_path=True) -> Path:
-    return venvs_root_path(abs_path) / "Hook_Scripts"
+    return resources_path(abs_path) / "Hook_Scripts"
 
 
 def repository_path(abs_path=True) -> Path:
