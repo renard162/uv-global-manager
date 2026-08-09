@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from shellingham import detect_shell, ShellDetectionFailure
+
 BASE_PYTHON_VERSION = "3.13"
 
 
@@ -24,4 +26,31 @@ def venv_script_path(venv_name: str) -> Path:
     if os_name == "nt":
         return venvs_root_path() / venv_name / "Scripts"
 
-    raise OSError(f"Unsupported operating system: {os_name}")
+
+def get_parent_shell() -> str:
+    os_name = os.name
+    shell_name, _ = detect_shell()
+
+    supported_shells = [
+        "sh",
+        "bash",
+        "dash",
+        "ash",
+        "csh",
+        "tcsh",
+        "ksh",
+        "zsh",
+        "fish",
+        "powershell",
+        "pwsh",
+        "nu",
+    ]
+    if os_name == "nt":
+        supported_shells.extend(["cmd", "xonsh"])
+    elif os_name == "posix":
+        supported_shells.extend([])
+
+    if shell_name not in supported_shells:
+        raise ShellDetectionFailure(f"Unsupported command shell: {shell_name}")
+
+    return shell_name
