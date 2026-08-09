@@ -33,7 +33,7 @@ def register(subparsers):
 
 
 def activate_run(args: argparse.Namespace):
-    if args.name is None:
+    if (args.name is None) or (args.name == ""):
         args.parser.print_help()
         return
 
