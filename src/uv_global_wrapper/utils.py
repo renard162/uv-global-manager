@@ -60,14 +60,14 @@ def get_script_extension(shell_name: str) -> str:
         "bash": "",
         "ksh": "",
         "zsh": "",
-        "csh": "csh",
-        "tcsh": "csh",
-        "fish": "fish",
-        "cmd": "bat",
-        "powershell": "ps1",
-        "pwsh": "ps1",
-        "xonsh": "xsh",
-        "nu": "nu",
+        "csh": ".csh",
+        "tcsh": ".csh",
+        "fish": ".fish",
+        "cmd": ".bat",
+        "powershell": ".ps1",
+        "pwsh": ".ps1",
+        "xonsh": ".xsh",
+        "nu": ".nu",
     }
     extension = extension_dict.get(shell_name, None)
 
