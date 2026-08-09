@@ -9,7 +9,6 @@ BASE_PYTHON_VERSION = "3.13"
 
 ANY_OS_SHELLS = {
     "bash": "posix",
-    "powershell": "powershell",
     "pwsh": "powershell",
     "nu": "nushell",
     "xonsh": "xonsh",
@@ -24,6 +23,7 @@ POSIX_ONLY_SHELLS = {
 }
 
 WINDOWS_ONLY_SHELLS = {
+    "powershell": "powershell",
     "cmd": "cmd",
 }
 
