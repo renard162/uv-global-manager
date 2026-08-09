@@ -1,6 +1,5 @@
 import argparse
 import os
-import sys
 
 from .commands import (
     activate,
@@ -10,7 +9,6 @@ from .commands import (
     makeproject,
     setup,
 )
-from .utils import print_warning
 from .utils import which_path_only as which
 
 
@@ -56,6 +54,3 @@ def integrity_check():
             "Required executables 'UV' and 'UVX' was not found in the PATH. "
             "Install UV and ensure it is accessible from the command line before using uv-global-wrapper."
         )
-
-    if which("uvg") is None:
-        print_warning("\nWarning: UVG is not available in PATH.\n")
