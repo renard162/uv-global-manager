@@ -21,13 +21,13 @@ COMMENT_MARKERS = {
 }
 
 HOOK_SCRIPTS = {
-    "posix": "uvg-posix.sh",
-    "cshell": "uvg-cshell.csh",
-    "fish": "uvg-fish.fish",
-    "powershell": "uvg-powershell.ps1",
-    "cmd": "uvg-cmd.bat",
-    "nushell": "uvg-nushell.nu",
-    "xonsh": "uvg-xonsh.xsh",
+    "posix": "uve-posix.sh",
+    "cshell": "uve-cshell.csh",
+    "fish": "uve-fish.fish",
+    "powershell": "uve-powershell.ps1",
+    "cmd": "uve-cmd.bat",
+    "nushell": "uve-nushell.nu",
+    "xonsh": "uve-xonsh.xsh",
 }
 
 
@@ -55,7 +55,7 @@ def gen_shell_hook_call(shell_family: str) -> str:
         "cshell": f'source "$HOME/{posix_location}/{hook_script}"',
         "fish": f'source "$HOME/{posix_location}/{hook_script}"',
         "powershell": f'. "$HOME\\{windows_location}\\{hook_script}"',
-        "cmd": f'doskey uvg=call "%USERPROFILE%\\{windows_location}\\{hook_script}" $*',
+        "cmd": f'doskey uve=call "%USERPROFILE%\\{windows_location}\\{hook_script}" $*',
         "nushell": f'source ($nu.home-dir | path join "{posix_location}/{hook_script}")',
         "xonsh": f'source "~/{posix_location}/{hook_script}"',
     }
@@ -89,36 +89,36 @@ def gen_shell_hook_script(shell_family: str) -> str:
 
 def gen_posix_hook_script() -> str:
     return dedent("""
-        uvg() {
+        uve() {
             if [ "$1" = "activate" ] &&
             [ -n "$2" ] &&
             [ "$2" != "-h" ] &&
             [ "$2" != "--help" ]; then
 
-                activation_command="$(command uvg activate "$2" --hook)" || return 1
+                activation_command="$(command uve activate "$2" --hook)" || return 1
 
                 eval "$activation_command"
                 return $?
             fi
 
-            command uvg "$@"
+            command uve "$@"
         }
     """).strip()
 
 
 def gen_cshell_hook_script() -> str:
     return dedent(r"""
-        alias uvg 'if ("!:1" == "activate" && "!:2" != "" && "!:2" != "-h" && "!:2" != "--help") then; eval `\uvg activate "\!:2" --hook`; else; \uvg !\*; endif'
+        alias uve 'if ("!:1" == "activate" && "!:2" != "" && "!:2" != "-h" && "!:2" != "--help") then; eval `\uve activate "\!:2" --hook`; else; \uve !\*; endif'
     """).strip()
 
 
 def gen_fish_hook_script() -> str:
     return dedent("""
-        function uvg
+        function uve
             if test (count $argv) -ge 2
                 if test "$argv[1]" = "activate"
                     if test "$argv[2]" != "-h"; and test "$argv[2]" != "--help"
-                        set -l activation_command (command uvg activate "$argv[2]" --hook)
+                        set -l activation_command (command uve activate "$argv[2]" --hook)
                         or return $status
 
                         eval $activation_command
@@ -127,23 +127,23 @@ def gen_fish_hook_script() -> str:
                 end
             end
 
-            command uvg $argv
+            command uve $argv
         end
     """).strip()
 
 
 def gen_powershell_hook_script() -> str:
     return dedent("""
-        $uvg_command = (Get-Command uvg -CommandType Application).Source
+        $uve_command = (Get-Command uve -CommandType Application).Source
 
-        function uvg {
+        function uve {
             if (
                 $args.Count -ge 2 -and
                 $args[0] -eq "activate" -and
                 $args[1] -ne "-h" -and
                 $args[1] -ne "--help"
             ) {
-                $activation_command = & $uvg_command activate $args[1] --hook
+                $activation_command = & $uve_command activate $args[1] --hook
 
                 if ($LASTEXITCODE -ne 0) {
                     return
@@ -153,7 +153,7 @@ def gen_powershell_hook_script() -> str:
                 return
             }
 
-            & $uvg_command @args
+            & $uve_command @args
         }
     """).strip()
 
@@ -168,14 +168,14 @@ def gen_cmd_hook_script() -> str:
             if /i "%~2"=="--help" goto :passthrough
 
             for /f "delims=" %%A in (
-                'uvg.exe activate "%~2" --hook'
+                'uve.exe activate "%~2" --hook'
             ) do call %%A
 
             exit /b %errorlevel%
         )
 
         :passthrough
-        uvg.exe %*
+        uve.exe %*
     """).strip()
 
 
@@ -184,24 +184,24 @@ def gen_nushell_hook_script() -> str:
     script_folder = venv_script_folder_name()
     return dedent(f"""
         def --env deactivate [] {{
-            if "UVG_OLD_PATH" not-in $env {{
+            if "UVE_OLD_PATH" not-in $env {{
                 return
             }}
 
             load-env {{
-                PATH: $env.UVG_OLD_PATH
-                PROMPT_COMMAND: $env.UVG_OLD_PROMPT_COMMAND
+                PATH: $env.UVE_OLD_PATH
+                PROMPT_COMMAND: $env.UVE_OLD_PROMPT_COMMAND
             }}
 
             hide-env VIRTUAL_ENV
             hide-env VIRTUAL_ENV_PROMPT
-            hide-env UVG_OLD_PATH
-            hide-env UVG_OLD_PROMPT_COMMAND
+            hide-env UVE_OLD_PATH
+            hide-env UVE_OLD_PROMPT_COMMAND
             hide-env VIRTUAL_PREFIX
         }}
 
-        def --env uvg-activate [venv_name: string] {{
-            if "UVG_OLD_PATH" in $env {{
+        def --env uve-activate [venv_name: string] {{
+            if "UVE_OLD_PATH" in $env {{
                 deactivate
             }}
 
@@ -226,8 +226,8 @@ def gen_nushell_hook_script() -> str:
             }}
 
             load-env {{
-                UVG_OLD_PATH: $old_path
-                UVG_OLD_PROMPT_COMMAND: $old_prompt_command
+                UVE_OLD_PATH: $old_path
+                UVE_OLD_PROMPT_COMMAND: $old_prompt_command
                 VIRTUAL_ENV: ($venv_path | into string)
                 VIRTUAL_ENV_PROMPT: $venv_name
                 VIRTUAL_PREFIX: $virtual_prefix
@@ -236,7 +236,7 @@ def gen_nushell_hook_script() -> str:
             }}
         }}
 
-        def --env uvg [...args] {{
+        def --env uve [...args] {{
             if (
                 ($args | length) >= 2 and
                 $args.0 == "activate" and
@@ -244,16 +244,16 @@ def gen_nushell_hook_script() -> str:
                 $args.1 != "--help"
             ) {{
                 try {{
-                    ^uvg activate $args.1 --hook | ignore
+                    ^uve activate $args.1 --hook | ignore
                 }} catch {{
                     return
                 }}
 
-                uvg-activate $args.1
+                uve-activate $args.1
                 return
             }}
 
-            ^uvg ...$args
+            ^uve ...$args
         }}
     """).strip()
 
@@ -263,14 +263,14 @@ def gen_xonsh_hook_script() -> str:
         import subprocess
         import sys
 
-        def _uvg(args):
+        def _uve(args):
             if (
                 len(args) >= 2
                 and args[0] == "activate"
                 and args[1] not in ("-h", "--help")
             ):
                 result = subprocess.run(
-                    ["uvg", "activate", *args[1:], "--hook"],
+                    ["uve", "activate", *args[1:], "--hook"],
                     capture_output=True,
                     text=True,
                 )
@@ -282,9 +282,9 @@ def gen_xonsh_hook_script() -> str:
                 __xonsh__.execer.exec(result.stdout)
                 return 0
 
-            return subprocess.run(["uvg", *args]).returncode
+            return subprocess.run(["uve", *args]).returncode
 
-        __xonsh__.aliases["uvg"] = _uvg
+        __xonsh__.aliases["uve"] = _uve
     """).strip()
 
 

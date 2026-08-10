@@ -71,9 +71,9 @@ def activate_run(args: argparse.Namespace):
 
     if not args.hook:
         print_stderr(
-            "The shell hook may not be installed, or the command may have been invoked using a command other than 'uvg'.\n"
-            "You may run 'uvg setup' for instructions on installing the shell hook.\n"
-            "Make sure to use exactly 'uvg' to invoke the command.\n"
+            "The shell hook may not be installed, or the command may have been invoked using a command other than 'uve'.\n"
+            "You may run 'uve setup' for instructions on installing the shell hook.\n"
+            "Make sure to use exactly 'uve' to invoke the command.\n"
             "Copy and paste the generated command to activate the virtual environment manually.\n"
         )
 

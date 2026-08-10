@@ -21,7 +21,10 @@ def register(subparsers: argparse._SubParsersAction):
         help="Name of the virtual environment to delete.",
     )
 
-    parser.set_defaults(func=delete_run, parser=parser)
+    parser.set_defaults(
+        func=delete_run,
+        parser=parser,
+    )
 
 
 def delete_run(args: argparse.Namespace):
