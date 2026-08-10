@@ -17,6 +17,7 @@ def register(subparsers):
     )
 
     parser.add_argument(
+        "-a",
         "--all",
         action="store_true",
         help="Show additional information about each virtual environment.",
@@ -31,7 +32,11 @@ def register(subparsers):
     parser.add_argument(
         "-p",
         "--python-version",
-        help="Filter environments by Python version.",
+        help=(
+            "Filter environments by Python version using PEP 440 specifiers. "
+            "(e.g. ~=, >=, <=, ==, !=, >, <). Quote the value when it contains shell operators, "
+            'e.g. ">=3.9".'
+        ),
     )
 
     parser.set_defaults(
