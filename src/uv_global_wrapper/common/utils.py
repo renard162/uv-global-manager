@@ -62,3 +62,20 @@ def which_path_only(command: str) -> str | None:
 
 def print_stderr(message: str):
     print(message, file=sys.stderr)
+
+
+def print_table(headers: list[str], rows: list[list[str]]) -> str:
+    columns = [headers, *rows]
+    widths = [max(len(row[index]) for row in columns) for index in range(len(headers))]
+
+    def format_row(row: list[str]) -> str:
+        return "  ".join(value.ljust(width) for value, width in zip(row, widths))
+
+    separator = "  ".join("-" * width for width in widths)
+    lines = [
+        format_row(headers),
+        separator,
+        *(format_row(row) for row in rows),
+    ]
+
+    return "\n".join(lines)

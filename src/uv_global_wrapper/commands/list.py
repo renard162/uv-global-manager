@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 from ..common.paths import venvs_root_path
+from ..common.utils import print_table
 
 
 def register(subparsers):
@@ -61,7 +62,7 @@ def list_run(args: argparse.Namespace):
     ):
         rows = [[environment.name] for environment in environments]
         headers = ["Environment"]
-        print(format_table(headers, rows))
+        print(print_table(headers, rows))
         return
 
     environment_data = load_environment_data(environments)
@@ -98,7 +99,7 @@ def list_run(args: argparse.Namespace):
         rows = [[environment["name"]] for environment in environment_data]
         headers = ["Environment"]
 
-    print(format_table(headers, rows))
+    print(print_table(headers, rows))
 
 
 def parse_pyvenv_cfg(path: Path) -> dict[str, str]:
@@ -229,20 +230,3 @@ def parse_python_version(version: str) -> tuple[int, ...]:
         raise ValueError(f'Invalid Python version: "{version}".')
 
     return tuple(int(part) for part in match.group(1).split("."))
-
-
-def format_table(headers: list[str], rows: list[list[str]]) -> str:
-    columns = [headers, *rows]
-    widths = [max(len(row[index]) for row in columns) for index in range(len(headers))]
-
-    def format_row(row: list[str]) -> str:
-        return "  ".join(value.ljust(width) for value, width in zip(row, widths))
-
-    separator = "  ".join("-" * width for width in widths)
-    lines = [
-        format_row(headers),
-        separator,
-        *(format_row(row) for row in rows),
-    ]
-
-    return "\n".join(lines)
