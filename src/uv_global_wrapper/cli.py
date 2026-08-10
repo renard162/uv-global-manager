@@ -14,7 +14,7 @@ from .core.utils import which_path_only as which
 
 def main():
     # try:
-    parser = argparse.ArgumentParser(prog="avg")
+    parser = argparse.ArgumentParser(prog="uve")
     sub = parser.add_subparsers(dest="command")
 
     activate.register(sub)
