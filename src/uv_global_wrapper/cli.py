@@ -9,7 +9,7 @@ from .commands import (
     makeproject,
     setup,
 )
-from .core.utils import which_path_only as which
+from .common.utils import which_path_only as which
 
 
 def main():
