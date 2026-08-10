@@ -141,11 +141,8 @@ def filter_by_python_version(
     specification: str,
 ) -> list[dict[str, str]]:
     specification = specification.strip().lower()
-
     clauses = [clause.strip() for clause in specification.split(",") if clause.strip()]
-
     predicates = [parse_version_specifier(clause) for clause in clauses]
-
     return [
         environment
         for environment in environments
@@ -207,7 +204,6 @@ def version_prefix_match(
     requested: tuple[int, ...],
 ) -> bool:
     candidate_version = parse_python_version(candidate)
-
     return candidate_version[: len(requested)] == requested
 
 
@@ -216,14 +212,10 @@ def compare_versions(
     right: str | tuple[int, ...],
 ) -> int:
     left_version = parse_python_version(left) if isinstance(left, str) else left
-
     right_version = parse_python_version(right) if isinstance(right, str) else right
-
     length = max(len(left_version), len(right_version))
-
     left_version += (0,) * (length - len(left_version))
     right_version += (0,) * (length - len(right_version))
-
     return (left_version > right_version) - (left_version < right_version)
 
 
