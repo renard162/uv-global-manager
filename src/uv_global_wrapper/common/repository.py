@@ -1,6 +1,6 @@
 import subprocess
 
-from .utils import repository_path
+from .paths import repository_path
 
 BASE_PYTHON_VERSION = "3.13"
 

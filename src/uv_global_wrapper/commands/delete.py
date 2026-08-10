@@ -5,7 +5,7 @@ import os
 import shutil
 from pathlib import Path
 
-from ..common.utils import venvs_root_path
+from ..common.paths import venvs_root_path
 
 
 def register(subparsers: argparse._SubParsersAction):

@@ -5,12 +5,14 @@ from pathlib import Path
 
 from shellingham import ShellDetectionFailure
 
-from ..common.utils import (
-    get_parent_shell,
+from ..common.paths import (
     path_as_posix,
     path_as_windows,
-    print_stderr,
     venv_script_path,
+)
+from ..common.utils import (
+    get_parent_shell,
+    print_stderr,
 )
 
 

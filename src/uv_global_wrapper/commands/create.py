@@ -7,12 +7,12 @@ import stat
 import subprocess
 from pathlib import Path
 
-from ..common.utils import (
-    print_stderr,
+from ..common.paths import (
     venv_interpreter_path,
     venv_script_path,
     venvs_root_path,
 )
+from ..common.utils import print_stderr
 
 
 def register(subparsers):
