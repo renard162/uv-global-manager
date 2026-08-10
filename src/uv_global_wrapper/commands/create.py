@@ -21,6 +21,7 @@ def register(subparsers):
         help="Create a global virtual environment.",
         description="Creates a global virtual environment.",
         formatter_class=argparse.RawTextHelpFormatter,
+        allow_abbrev=False,
     )
 
     parser.add_argument(

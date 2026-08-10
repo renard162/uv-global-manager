@@ -12,6 +12,7 @@ def register(subparsers):
         "list",
         help="List global virtual environments.",
         description="Lists global virtual environments.",
+        allow_abbrev=False,
     )
 
     parser.add_argument(

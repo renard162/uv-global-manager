@@ -19,6 +19,7 @@ def register(subparsers):
         "activate",
         help="Activate a global virtual environment.",
         description="Activates a global virtual environment.",
+        allow_abbrev=False,
     )
 
     parser.add_argument(

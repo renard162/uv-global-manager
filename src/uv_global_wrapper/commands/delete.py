@@ -13,6 +13,7 @@ def register(subparsers: argparse._SubParsersAction):
         "delete",
         help="Remove a global virtual environment.",
         description="Deletes a global virtual environment.",
+        allow_abbrev=False,
     )
 
     parser.add_argument(
