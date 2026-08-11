@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -124,34 +125,44 @@ def makeproject_run(args: argparse.Namespace):
             f'The destination directory "{target_path}" already exists.'
         )
 
-    init_project(
-        target_path=target_path,
-        python_path=python_path,
-        bare=args.bare,
-        project_type=args.project_type,
-    )
+    try:
+        init_project(
+            target_path=target_path,
+            python_path=python_path,
+            bare=args.bare,
+            project_type=args.project_type,
+        )
 
-    requirements_path = target_path / "requirements.txt"
+        requirements_path = target_path / "requirements.txt"
 
-    venv_config = parse_pyvenv_cfg(active_env_path / "pyvenv.cfg")
-    implementation = venv_config.get("implementation")
-    if implementation is None:
-        print_stderr('Warning: The "implementation" key was not found in pyvenv.cfg.')
-    use_pip_freeze = implementation != "CPython"
-    if not use_pip_freeze:
-        use_pip_freeze = not ensure_pipdeptree()
+        venv_config = parse_pyvenv_cfg(active_env_path / "pyvenv.cfg")
+        implementation = venv_config.get("implementation")
 
-    export_requirements(
-        python_path=python_path,
-        requirements_path=requirements_path,
-        use_pip_freeze=use_pip_freeze,
-    )
+        if implementation is None:
+            print_stderr(
+                'Warning: The "implementation" key was not found in pyvenv.cfg.'
+            )
 
-    add_requirements(
-        target_path=target_path,
-        requirements_path=requirements_path,
-        bare=args.bare,
-    )
+        use_pip_freeze = implementation != "CPython"
+
+        if not use_pip_freeze:
+            use_pip_freeze = not ensure_pipdeptree()
+
+        export_requirements(
+            python_path=python_path,
+            requirements_path=requirements_path,
+            use_pip_freeze=use_pip_freeze,
+        )
+
+        add_requirements(
+            target_path=target_path,
+            requirements_path=requirements_path,
+            bare=args.bare,
+        )
+
+    except Exception:
+        remove_project_folder(target_path)
+        raise
 
 
 def ensure_pipdeptree() -> bool:
@@ -293,11 +304,21 @@ def export_with_pip_freeze(
     )
 
 
+def has_requirements(requirements_path: Path) -> bool:
+    return any(
+        line.strip()
+        for line in requirements_path.read_text(encoding="utf-8").splitlines()
+    )
+
+
 def add_requirements(
     target_path: Path,
     requirements_path: Path,
     bare: bool,
 ) -> None:
+    if not has_requirements(requirements_path):
+        return
+
     command = [
         "uv",
         "add",
@@ -336,3 +357,15 @@ def add_requirements(
     finally:
         if old_virtual_env is not None:
             os.environ["VIRTUAL_ENV"] = old_virtual_env
+
+
+def remove_project_folder(target_path: Path) -> None:
+    if not target_path.exists():
+        return
+
+    try:
+        shutil.rmtree(target_path)
+    except OSError as exc:
+        print_stderr(
+            f'Error: Unable to delete the project directory "{target_path}": {exc}'
+        )
