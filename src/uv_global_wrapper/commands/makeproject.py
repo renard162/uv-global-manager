@@ -41,23 +41,23 @@ def register(subparsers):
     )
 
     parser.add_argument(
-        "--bare",
-        action="store_true",
-        help=(
-            "Generate only the project metadata and dependency specification; "
-            "do not create the project virtual environment or install dependencies."
-        ),
-    )
-
-    project_type = parser.add_mutually_exclusive_group()
-
-    project_type.add_argument(
         "--bounds",
         choices=("lower", "major", "minor", "exact"),
         default="exact",
         help=(
             "Specify the version bounds to apply to project dependencies. "
             "Choices: lower, major, minor, exact. Defaults to exact."
+        ),
+    )
+
+    project_type = parser.add_mutually_exclusive_group()
+
+    project_type.add_argument(
+        "--bare",
+        action="store_true",
+        help=(
+            "Generate only the project metadata and dependency specification; "
+            "do not create the project virtual environment or install dependencies."
         ),
     )
 
