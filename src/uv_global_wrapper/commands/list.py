@@ -188,7 +188,7 @@ def filter_by_implementation(
     return [
         environment
         for environment in environments
-        if environment["implementation"].strip().lower() == implementation
+        if implementation in environment["implementation"].strip().lower()
     ]
 
 
