@@ -79,7 +79,7 @@ def list_run(args: argparse.Namespace):
         headers = [
             "Implementation",
             "Python Version",
-            "Environments",
+            "Environment Count",
         ]
 
         print(print_table(headers, rows))
