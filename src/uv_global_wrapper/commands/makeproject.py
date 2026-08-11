@@ -5,7 +5,10 @@ import os
 import subprocess
 from pathlib import Path
 
-from ..common.paths import venv_interpreter_path
+from ..common.paths import (
+    active_venv_path,
+    venv_interpreter_path,
+)
 from ..common.repository import (
     check_package_call,
     download_package,
@@ -90,14 +93,13 @@ def register(subparsers):
 
 
 def makeproject_run(args: argparse.Namespace):
-    virtual_env = os.environ.get("VIRTUAL_ENV")
+    active_env_path = active_venv_path()
 
-    if not virtual_env:
+    if active_env_path is None:
         raise RuntimeError(
             "This command can only be executed from an active virtual environment."
         )
 
-    active_env_path = Path(virtual_env)
     env_name = active_env_path.name
     python_path = venv_interpreter_path(env_name)
 
@@ -134,16 +136,11 @@ def makeproject_run(args: argparse.Namespace):
 
     requirements_path = target_path / "requirements.txt"
 
-    if use_pip_freeze:
-        _export_with_pip_freeze(
-            python_path,
-            requirements_path,
-        )
-    elif not _export_with_pipdeptree(requirements_path):
-        _export_with_pip_freeze(
-            python_path,
-            requirements_path,
-        )
+    _export_requirements(
+        python_path=python_path,
+        requirements_path=requirements_path,
+        use_pip_freeze=use_pip_freeze,
+    )
 
     _add_requirements(
         target_path=target_path,
@@ -240,6 +237,29 @@ def _init_project(
         )
     except subprocess.CalledProcessError as exc:
         raise RuntimeError("uv init failed.") from exc
+
+
+def _export_requirements(
+    python_path: Path,
+    requirements_path: Path,
+    use_pip_freeze: bool,
+) -> None:
+    if use_pip_freeze:
+        _export_with_pip_freeze(
+            python_path,
+            requirements_path,
+        )
+        return
+
+    pipdeptree_success = _export_with_pipdeptree(
+        requirements_path,
+    )
+
+    if not pipdeptree_success:
+        _export_with_pip_freeze(
+            python_path,
+            requirements_path,
+        )
 
 
 def _export_with_pipdeptree(
