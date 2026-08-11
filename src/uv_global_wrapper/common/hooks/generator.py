@@ -33,9 +33,7 @@ def generate_hook_script(shell_family: str) -> None:
 
 
 def generate_hook_launcher_script(folder_path: Path, shell_family: str) -> None:
-    script_path = (
-        folder_path / f"{HOOK_LAUNCHER_SCRIPT_NAME}.{SCRIPT_EXTENSIONS[shell_family]}"
-    )
+    script_path = folder_path / get_hook_launcher_script_name(shell_family)
     generate_script(
         script_path=script_path,
         content=render_shell_hook_call(shell_family),
@@ -73,6 +71,10 @@ def remove_hook_launcher_code_block(
     start, end = block_positions
     content = script_path.read_bytes()
     script_path.write_bytes(content[:start] + content[end:])
+
+
+def get_hook_launcher_script_name(shell_family: str):
+    return f"{HOOK_LAUNCHER_SCRIPT_NAME}.{SCRIPT_EXTENSIONS[shell_family]}"
 
 
 def generate_script(script_path: Path, content: str) -> None:

@@ -8,6 +8,7 @@ from ..common.hooks.generator import (
     find_hook_launcher_code_block,
     generate_hook_launcher_script,
     generate_hook_script,
+    get_hook_launcher_script_name,
     insert_hook_launcher_code_block,
     remove_hook_launcher_code_block,
 )
