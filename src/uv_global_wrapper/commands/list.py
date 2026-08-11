@@ -21,13 +21,6 @@ def register(subparsers):
     )
 
     parser.add_argument(
-        "-d",
-        "--details",
-        action="store_true",
-        help="Show additional information about each virtual environment.",
-    )
-
-    parser.add_argument(
         "-i",
         "--implementation",
         help="Filter environments by Python implementation.",
@@ -43,6 +36,19 @@ def register(subparsers):
         ),
     )
 
+    parser.add_argument(
+        "-d",
+        "--details",
+        action="store_true",
+        help="Show additional information about each virtual environment.",
+    )
+
+    parser.add_argument(
+        "--stats",
+        action="store_true",
+        help="Show statistics grouped by Python implementation and version.",
+    )
+
     parser.set_defaults(
         func=list_run,
         parser=parser,
@@ -50,11 +56,34 @@ def register(subparsers):
 
 
 def list_run(args: argparse.Namespace):
+    if args.stats and any(
+        (
+            args.details,
+            args.implementation,
+            args.python_version,
+        )
+    ):
+        args.parser.error("--stats cannot be combined with other options.")
+
     environments = sorted(
         path
         for path in venvs_root_path().iterdir()
         if path.is_dir() and (path / "pyvenv.cfg").is_file()
     )
+
+    if args.stats:
+        environment_data = load_environment_data(environments)
+
+        rows = generate_stats(environment_data)
+
+        headers = [
+            "Implementation",
+            "Python Version",
+            "Environments",
+        ]
+
+        print(print_table(headers, rows))
+        return
 
     if not any(
         (
@@ -85,22 +114,39 @@ def list_run(args: argparse.Namespace):
             args.python_version,
         )
 
-    rows = [
-        [
-            environment["name"],
-            environment["version_info"],
-            environment["implementation"],
-            environment["size_mb"],
+    if args.details:
+        rows = [
+            [
+                environment["name"],
+                environment["version_info"],
+                environment["implementation"],
+                environment["size_mb"],
+            ]
+            for environment in environment_data
         ]
-        for environment in environment_data
-    ]
 
-    headers = [
-        "Environment",
-        "Python Version",
-        "Implementation",
-        "Size (MB)",
-    ]
+        headers = [
+            "Environment",
+            "Python Version",
+            "Implementation",
+            "Size (MB)",
+        ]
+
+    else:
+        rows = [
+            [
+                environment["name"],
+                environment["version_info"],
+                environment["implementation"],
+            ]
+            for environment in environment_data
+        ]
+
+        headers = [
+            "Environment",
+            "Python Version",
+            "Implementation",
+        ]
 
     print(print_table(headers, rows))
 
@@ -239,3 +285,26 @@ def parse_python_version(version: str) -> tuple[int, ...]:
         raise ValueError(f'Invalid Python version: "{version}".')
 
     return tuple(int(part) for part in match.group(1).split("."))
+
+
+def generate_stats(
+    environments: list[dict[str, str]],
+) -> list[list[str]]:
+    stats = {}
+
+    for environment in environments:
+        key = (
+            environment["implementation"],
+            parse_python_version(environment["version_info"]),
+        )
+
+        stats[key] = stats.get(key, 0) + 1
+
+    return [
+        [
+            implementation,
+            ".".join(str(part) for part in version),
+            str(count),
+        ]
+        for (implementation, version), count in sorted(stats.items())
+    ]
