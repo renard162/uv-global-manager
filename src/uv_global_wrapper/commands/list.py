@@ -58,7 +58,7 @@ def list_run(args: argparse.Namespace):
 
     if not any(
         (
-            args.all,
+            args.details,
             args.implementation,
             args.python_version,
         )
@@ -68,7 +68,10 @@ def list_run(args: argparse.Namespace):
         print(print_table(headers, rows))
         return
 
-    environment_data = load_environment_data(environments)
+    environment_data = load_environment_data(
+        environments,
+        include_size=args.details,
+    )
 
     if args.implementation:
         environment_data = filter_by_implementation(
@@ -82,41 +85,53 @@ def list_run(args: argparse.Namespace):
             args.python_version,
         )
 
-    if args.all:
-        rows = [
-            [
-                environment["name"],
-                environment["version_info"],
-                environment["implementation"],
-            ]
-            for environment in environment_data
+    rows = [
+        [
+            environment["name"],
+            environment["version_info"],
+            environment["implementation"],
+            environment["size_mb"],
         ]
+        for environment in environment_data
+    ]
 
-        headers = [
-            "Environment",
-            "Python Version",
-            "Implementation",
-        ]
-
-    else:
-        rows = [[environment["name"]] for environment in environment_data]
-        headers = ["Environment"]
+    headers = [
+        "Environment",
+        "Python Version",
+        "Implementation",
+        "Size (MB)",
+    ]
 
     print(print_table(headers, rows))
 
 
-def load_environment_data(environments: list[Path]) -> list[dict[str, str]]:
+def load_environment_data(
+    environments: list[Path],
+    include_size: bool = False,
+) -> list[dict[str, str]]:
     data = []
+
     for environment in environments:
         config = parse_pyvenv_cfg(environment / "pyvenv.cfg")
-        data.append(
-            {
-                "name": environment.name,
-                "version_info": config.get("version_info", ""),
-                "implementation": config.get("implementation", ""),
-            }
-        )
+
+        environment_data = {
+            "name": environment.name,
+            "version_info": config.get("version_info", ""),
+            "implementation": config.get("implementation", ""),
+        }
+
+        if include_size:
+            environment_data["size_mb"] = (
+                f"{get_directory_size(environment) / 1024**2:.2f}"
+            )
+
+        data.append(environment_data)
+
     return data
+
+
+def get_directory_size(directory: Path) -> int:
+    return sum(file.stat().st_size for file in directory.rglob("*") if file.is_file())
 
 
 def filter_by_implementation(
