@@ -29,9 +29,10 @@ def render_shell_hook_call_insertion(shell_family: str) -> str:
         raise ShellDetectionFailure(f"Unsupported shell family: {shell_family}")
 
     return (
+        "\n"
         f"{comment} uv-global-wrapper-hook-call-init\n"
         f"{render_shell_hook_call(shell_family)}\n"
-        f"{comment} uv-global-wrapper-hook-call-end"
+        f"{comment} uv-global-wrapper-hook-call-end\n"
     )
 
 
