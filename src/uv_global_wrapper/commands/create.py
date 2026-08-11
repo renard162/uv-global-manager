@@ -61,7 +61,6 @@ def create_run(args: argparse.Namespace):
         return
 
     env_path = venvs_root_path() / args.name
-    env_path.parent.mkdir(parents=True, exist_ok=True)
 
     if (env_path / "pyvenv.cfg").is_file():
         raise RuntimeError(f'Virtual environment "{args.name}" already exists.')
@@ -71,6 +70,7 @@ def create_run(args: argparse.Namespace):
             f'The virtual environment directory "{env_path}" already exists.'
         )
 
+    env_path.parent.mkdir(parents=True, exist_ok=True)
     requirements_path = None
 
     if args.requirements is not None:
