@@ -1,11 +1,342 @@
+from __future__ import annotations
+
+import argparse
+import os
+import subprocess
+from pathlib import Path
+
+from ..common.paths import venv_interpreter_path
+from ..common.repository import (
+    check_package_call,
+    download_package,
+    run_package,
+)
+from ..common.utils import print_stderr
+
+
 def register(subparsers):
+    parser = subparsers.add_parser(
+        "make-project",
+        help="Generate a UV project template from the active virtual environment.",
+        description=(
+            "Generates a UV project template from the active virtual environment."
+        ),
+    )
 
-    parser = subparsers.add_parser("make-project")
+    parser.add_argument(
+        "name",
+        nargs="?",
+        help=(
+            "Target project directory. If omitted, the active virtual "
+            "environment name is used."
+        ),
+    )
 
-    parser.add_argument("name")
+    parser.add_argument(
+        "--bare",
+        action="store_true",
+        help=(
+            "Generate only the project metadata and dependency specification; "
+            "do not create the project virtual environment or install dependencies."
+        ),
+    )
 
-    parser.set_defaults(func=make_run)
+    project_type = parser.add_mutually_exclusive_group()
+
+    project_type.add_argument(
+        "--app",
+        action="store_const",
+        const="--app",
+        dest="project_type",
+        help="Generate an application project.",
+    )
+
+    project_type.add_argument(
+        "--lib",
+        action="store_const",
+        const="--lib",
+        dest="project_type",
+        help="Generate a library project.",
+    )
+
+    project_type.add_argument(
+        "--script",
+        action="store_const",
+        const="--script",
+        dest="project_type",
+        help="Generate a script project.",
+    )
+
+    project_type.add_argument(
+        "--package",
+        action="store_const",
+        const="--package",
+        dest="project_type",
+        help="Generate a package project.",
+    )
+
+    project_type.add_argument(
+        "--no-package",
+        action="store_const",
+        const="--no-package",
+        dest="project_type",
+        help="Do not generate a package project.",
+    )
+
+    parser.set_defaults(
+        func=makeproject_run,
+        parser=parser,
+    )
 
 
-def make_run():
-    return
+def makeproject_run(args: argparse.Namespace):
+    virtual_env = os.environ.get("VIRTUAL_ENV")
+
+    if not virtual_env:
+        raise RuntimeError(
+            "This command can only be executed from an active virtual environment."
+        )
+
+    active_env_path = Path(virtual_env)
+    env_name = active_env_path.name
+    python_path = venv_interpreter_path(env_name)
+
+    if not python_path.is_file():
+        raise RuntimeError(
+            "Python interpreter for the active virtual environment was not found: "
+            f'"{python_path}".'
+        )
+
+    project_name = args.name or env_name
+    target_path = Path.cwd() / project_name
+
+    if target_path.exists():
+        raise FileExistsError(
+            f'The destination directory "{target_path}" already exists.'
+        )
+
+    implementation = _venv_config_value(
+        active_env_path,
+        "implementation",
+    )
+
+    use_pip_freeze = implementation != "CPython"
+
+    if not use_pip_freeze:
+        use_pip_freeze = not _ensure_pipdeptree()
+
+    _init_project(
+        target_path=target_path,
+        python_path=python_path,
+        bare=args.bare,
+        project_type=args.project_type,
+    )
+
+    requirements_path = target_path / "requirements.txt"
+
+    if use_pip_freeze:
+        _export_with_pip_freeze(
+            python_path,
+            requirements_path,
+        )
+    elif not _export_with_pipdeptree(requirements_path):
+        _export_with_pip_freeze(
+            python_path,
+            requirements_path,
+        )
+
+    _add_requirements(
+        target_path=target_path,
+        requirements_path=requirements_path,
+        bare=args.bare,
+    )
+
+
+def _venv_config_value(
+    venv_path: Path,
+    key: str,
+) -> str:
+    config_path = venv_path / "pyvenv.cfg"
+
+    try:
+        content = config_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        raise RuntimeError(
+            "Unable to read the active virtual environment configuration "
+            f'"{config_path}".'
+        ) from exc
+
+    prefix = f"{key} ="
+
+    for line in content.splitlines():
+        if line.startswith(prefix):
+            return line.split("=", 1)[1].strip()
+
+    raise RuntimeError(
+        f'The active virtual environment configuration does not define "{key}".'
+    )
+
+
+def _ensure_pipdeptree() -> bool:
+    if check_package_call(
+        "pipdeptree",
+        raise_on_fail=False,
+    ):
+        return True
+
+    print("Updating the local package repository.")
+
+    if download_package(
+        "pipdeptree==4.*",
+        raise_on_fail=False,
+        print_stdout=True,
+        print_stderr=False,
+    ):
+        print_stderr(
+            "Error: Failed to update the local package repository. "
+            'Falling back to "uv pip freeze".'
+        )
+        return False
+
+    if check_package_call(
+        "pipdeptree",
+        raise_on_fail=False,
+    ):
+        return True
+
+    print_stderr(
+        "Warning: The local package repository is unavailable. "
+        'Falling back to "uv pip freeze".'
+    )
+
+    return False
+
+
+def _init_project(
+    target_path: Path,
+    python_path: Path,
+    bare: bool,
+    project_type: str | None,
+) -> None:
+    command = [
+        "uv",
+        "init",
+        "--python",
+        str(python_path),
+    ]
+
+    if bare:
+        command.append("--bare")
+
+    if project_type is not None:
+        command.append(project_type)
+
+    command.append(str(target_path))
+
+    try:
+        subprocess.run(
+            command,
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError("uv init failed.") from exc
+
+
+def _export_with_pipdeptree(
+    requirements_path: Path,
+) -> bool:
+    result = run_package(
+        "pipdeptree --warn fail --depth 0 --output freeze",
+        raise_on_fail=False,
+    )
+
+    if result == 1:
+        print_stderr(
+            "Error: An error occurred while determining first-level dependencies."
+        )
+        return False
+
+    requirements_path.write_text(
+        str(result),
+        encoding="utf-8",
+    )
+
+    return True
+
+
+def _export_with_pip_freeze(
+    python_path: Path,
+    requirements_path: Path,
+) -> None:
+    print_stderr(
+        "Warning: The generated project may include transitive dependencies "
+        "that are not directly required by the project."
+    )
+
+    try:
+        result = subprocess.run(
+            [
+                "uv",
+                "pip",
+                "freeze",
+                "--python",
+                str(python_path),
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError("uv pip freeze failed.") from exc
+
+    requirements_path.write_text(
+        result.stdout,
+        encoding="utf-8",
+    )
+
+
+def _add_requirements(
+    target_path: Path,
+    requirements_path: Path,
+    bare: bool,
+) -> None:
+    command = [
+        "uv",
+        "add",
+        "--project",
+        str(target_path),
+    ]
+
+    if bare:
+        command.extend(
+            [
+                "--active",
+                "--no-sync",
+            ]
+        )
+
+        subprocess.run(
+            [
+                *command,
+                "--requirements",
+                str(requirements_path),
+            ],
+            check=True,
+        )
+        return
+
+    old_virtual_env = os.environ.pop("VIRTUAL_ENV", None)
+
+    try:
+        subprocess.run(
+            [
+                *command,
+                "--requirements",
+                str(requirements_path),
+            ],
+            check=True,
+        )
+    finally:
+        if old_virtual_env is not None:
+            os.environ["VIRTUAL_ENV"] = old_virtual_env
