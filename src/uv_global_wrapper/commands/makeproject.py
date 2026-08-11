@@ -78,14 +78,6 @@ def register(subparsers):
     )
 
     project_type.add_argument(
-        "--script",
-        action="store_const",
-        const="--script",
-        dest="project_type",
-        help="Generate a script project.",
-    )
-
-    project_type.add_argument(
         "--package",
         action="store_const",
         const="--package",
