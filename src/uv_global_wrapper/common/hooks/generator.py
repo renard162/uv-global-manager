@@ -3,20 +3,11 @@ from pathlib import Path
 
 from ..paths import hook_script_path
 from .renders import (
+    HOOK_SCRIPT_NAMES,
     render_shell_hook_call,
     render_shell_hook_call_insertion,
     render_shell_hook_script,
 )
-
-HOOK_SCRIPTS = {
-    "posix": "uve-posix.sh",
-    "cshell": "uve-cshell.csh",
-    "fish": "uve-fish.fish",
-    "powershell": "uve-powershell.ps1",
-    "cmd": "uve-cmd.bat",
-    "nushell": "uve-nushell.nu",
-    "xonsh": "uve-xonsh.xsh",
-}
 
 SCRIPT_EXTENSIONS = {
     "posix": "sh",
@@ -30,7 +21,7 @@ SCRIPT_EXTENSIONS = {
 
 
 def generate_hook_script(shell_family: str) -> None:
-    script_path = hook_script_path() / HOOK_SCRIPTS[shell_family]
+    script_path = hook_script_path() / HOOK_SCRIPT_NAMES[shell_family]
     generate_script(
         script_path=script_path,
         content=render_shell_hook_script(shell_family),

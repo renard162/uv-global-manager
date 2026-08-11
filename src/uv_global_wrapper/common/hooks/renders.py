@@ -9,7 +9,18 @@ from ..paths import (
     venv_script_folder_name,
     venvs_root_path,
 )
-from .generator import HOOK_SCRIPTS
+
+HOOK_SCRIPT_NAMES = {
+    "posix": "uve-posix.sh",
+    "cshell": "uve-cshell.csh",
+    "fish": "uve-fish.fish",
+    "powershell": "uve-powershell.ps1",
+    "cmd": "uve-cmd.bat",
+    "nushell": "uve-nushell.nu",
+    "xonsh": "uve-xonsh.xsh",
+}
+
+HOOK_MARKER = "uv-global-wrapper-hook-call"
 
 COMMENT_MARKERS = {
     "posix": "#",
@@ -30,9 +41,9 @@ def render_shell_hook_call_insertion(shell_family: str) -> str:
 
     return (
         "\n"
-        f"{comment} uv-global-wrapper-hook-call-init\n"
+        f"{comment} {HOOK_MARKER}-init\n"
         f"{render_shell_hook_call(shell_family)}\n"
-        f"{comment} uv-global-wrapper-hook-call-end\n"
+        f"{comment} {HOOK_MARKER}-end\n"
     )
 
 
@@ -41,7 +52,7 @@ def render_shell_hook_call(shell_family: str) -> str:
     posix_location = path_as_posix(hook_script_location)
     windows_location = path_as_windows(hook_script_location)
 
-    hook_script = HOOK_SCRIPTS.get(shell_family)
+    hook_script = HOOK_SCRIPT_NAMES.get(shell_family)
     hook_calls_dict = {
         "posix": f'source "$HOME/{posix_location}/{hook_script}"',
         "cshell": f'source "$HOME/{posix_location}/{hook_script}"',
@@ -87,7 +98,7 @@ def template_posix_hook_script() -> str:
             [ "$2" != "-h" ] &&
             [ "$2" != "--help" ]; then
 
-                activation_command="$(command uve activate "$2" --hook)" || return 1
+                activation_command="$(command uve activate "$2" --hook posix)" || return 1
 
                 eval "$activation_command"
                 return $?
@@ -100,7 +111,7 @@ def template_posix_hook_script() -> str:
 
 def template_cshell_hook_script() -> str:
     return dedent(r"""
-        alias uve 'if ("!:1" == "activate" && "!:2" != "" && "!:2" != "-h" && "!:2" != "--help") then; eval `\uve activate "\!:2" --hook`; else; \uve !\*; endif'
+        alias uve 'if ("!:1" == "activate" && "!:2" != "" && "!:2" != "-h" && "!:2" != "--help") then; eval `\uve activate "\!:2" --hook cshell`; else; \uve !\*; endif'
     """).strip()
 
 
@@ -110,7 +121,7 @@ def template_fish_hook_script() -> str:
             if test (count $argv) -ge 2
                 if test "$argv[1]" = "activate"
                     if test "$argv[2]" != "-h"; and test "$argv[2]" != "--help"
-                        set -l activation_command (command uve activate "$argv[2]" --hook)
+                        set -l activation_command (command uve activate "$argv[2]" --hook fish)
                         or return $status
 
                         eval $activation_command
@@ -135,7 +146,7 @@ def template_powershell_hook_script() -> str:
                 $args[1] -ne "-h" -and
                 $args[1] -ne "--help"
             ) {
-                $activation_command = & $uve_command activate $args[1] --hook
+                $activation_command = & $uve_command activate $args[1] --hook powershell
 
                 if ($LASTEXITCODE -ne 0) {
                     return
@@ -160,7 +171,7 @@ def template_cmd_hook_script() -> str:
             if /i "%~2"=="--help" goto :passthrough
 
             for /f "delims=" %%A in (
-                'uve.exe activate "%~2" --hook'
+                'uve.exe activate "%~2" --hook cmd'
             ) do call %%A
 
             exit /b %errorlevel%
@@ -236,7 +247,7 @@ def template_nushell_hook_script() -> str:
                 $args.1 != "--help"
             ) {{
                 try {{
-                    ^uve activate $args.1 --hook | ignore
+                    ^uve activate $args.1 --hook nushell | ignore
                 }} catch {{
                     return
                 }}
@@ -262,7 +273,7 @@ def template_xonsh_hook_script() -> str:
                 and args[1] not in ("-h", "--help")
             ):
                 result = subprocess.run(
-                    ["uve", "activate", *args[1:], "--hook"],
+                    ["uve", "activate", *args[1:], "--hook", "xonsh"],
                     capture_output=True,
                     text=True,
                 )
