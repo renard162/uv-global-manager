@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -45,6 +46,16 @@ def register(subparsers):
         help=(
             "Generate only the project metadata and dependency specification; "
             "do not create the project virtual environment or install dependencies."
+        ),
+    )
+
+    parser.add_argument(
+        "--bounds",
+        choices=("lower", "major", "minor", "exact"),
+        default="exact",
+        help=(
+            "Specify the version bounds to apply to project dependencies. "
+            "Choices: lower, major, minor, exact. Defaults to exact."
         ),
     )
 
@@ -152,6 +163,7 @@ def makeproject_run(args: argparse.Namespace):
             python_path=python_path,
             requirements_path=requirements_path,
             use_pip_freeze=use_pip_freeze,
+            bounds=args.bounds,
         )
 
         add_requirements(
@@ -230,28 +242,94 @@ def init_project(
         raise RuntimeError("uv init failed.") from exc
 
 
+def apply_bounds(
+    requirements: str,
+    bounds: str,
+) -> str:
+    if bounds == "exact":
+        return requirements
+
+    result = []
+
+    for line in requirements.splitlines(keepends=True):
+        stripped = line.strip()
+
+        if not stripped or stripped.startswith("#"):
+            result.append(line)
+            continue
+
+        match = re.fullmatch(
+            r"(?P<package>[A-Za-z0-9][A-Za-z0-9._-]*"
+            r"(?:\[[^\]]+\])?)"
+            r"=="
+            r"(?P<version>\d+(?:\.\d+)+)"
+            r"(?P<suffix>\s*(?:;.*)?)"
+            r"(?P<newline>\r?\n)?",
+            line,
+        )
+
+        if match is None:
+            result.append(line)
+            continue
+
+        package = match.group("package")
+        version = match.group("version")
+        suffix = match.group("suffix")
+        newline = match.group("newline") or ""
+
+        version_parts = [int(part) for part in version.split(".")]
+
+        if bounds == "lower":
+            requirement = f"{package}>={version}"
+
+        elif bounds == "major":
+            major = version_parts[0]
+            upper_bound = f"{major + 1}.0.0"
+            requirement = f"{package}>={version},<{upper_bound}"
+
+        elif bounds == "minor":
+            major = version_parts[0]
+            minor = version_parts[1]
+            upper_bound = f"{major}.{minor + 1}.0"
+            requirement = f"{package}>={version},<{upper_bound}"
+
+        else:
+            raise ValueError(f'Unsupported dependency bound: "{bounds}".')
+
+        result.append(f"{requirement}{suffix}{newline}")
+
+    return "".join(result)
+
+
 def export_requirements(
     python_path: Path,
     requirements_path: Path,
     use_pip_freeze: bool,
+    bounds: str,
 ) -> None:
     if use_pip_freeze:
         export_with_pip_freeze(
-            python_path,
-            requirements_path,
+            python_path=python_path,
+            requirements_path=requirements_path,
+            bounds=bounds,
         )
         return
 
-    pipdeptree_success = export_with_pipdeptree(requirements_path)
+    pipdeptree_success = export_with_pipdeptree(
+        requirements_path=requirements_path,
+        bounds=bounds,
+    )
     if not pipdeptree_success:
         export_with_pip_freeze(
-            python_path,
-            requirements_path,
+            python_path=python_path,
+            requirements_path=requirements_path,
+            bounds=bounds,
         )
 
 
 def export_with_pipdeptree(
     requirements_path: Path,
+    bounds: str,
 ) -> bool:
     result = run_package(
         "pipdeptree --warn fail --depth 0 --output freeze",
@@ -264,8 +342,13 @@ def export_with_pipdeptree(
         )
         return False
 
+    result = apply_bounds(
+        requirements=str(result),
+        bounds=bounds,
+    )
+
     requirements_path.write_text(
-        str(result),
+        result,
         encoding="utf-8",
     )
 
@@ -275,6 +358,7 @@ def export_with_pipdeptree(
 def export_with_pip_freeze(
     python_path: Path,
     requirements_path: Path,
+    bounds: str,
 ) -> None:
     print_stderr(
         "Warning: The generated project may include transitive dependencies "
@@ -298,8 +382,13 @@ def export_with_pip_freeze(
     except subprocess.CalledProcessError as exc:
         raise RuntimeError("uv pip freeze failed.") from exc
 
+    requirements = apply_bounds(
+        requirements=result.stdout,
+        bounds=bounds,
+    )
+
     requirements_path.write_text(
-        result.stdout,
+        requirements,
         encoding="utf-8",
     )
 
