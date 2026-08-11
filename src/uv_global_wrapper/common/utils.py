@@ -7,23 +7,25 @@ from pathlib import Path
 
 from shellingham import ShellDetectionFailure, detect_shell
 
+# Shells are grouped by familly not by shell name,
+# for this reason ksh and zsh is "any os" for example
 ANY_OS_SHELLS = {
     "bash": "posix",
+    "ksh": "posix",
+    "zsh": "posix",
     "pwsh": "powershell",
+    "powershell": "powershell",
     "nu": "nushell",
     "xonsh": "xonsh",
 }
 
 POSIX_ONLY_SHELLS = {
-    "ksh": "posix",
-    "zsh": "posix",
     "csh": "cshell",
     "tcsh": "cshell",
     "fish": "fish",
 }
 
 WINDOWS_ONLY_SHELLS = {
-    "powershell": "powershell",
     "cmd": "cmd",
 }
 
