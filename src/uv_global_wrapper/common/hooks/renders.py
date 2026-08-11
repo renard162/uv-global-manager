@@ -9,6 +9,7 @@ from ..paths import (
     venv_script_folder_name,
     venvs_root_path,
 )
+from .generator import HOOK_SCRIPTS
 
 COMMENT_MARKERS = {
     "posix": "#",
@@ -20,18 +21,8 @@ COMMENT_MARKERS = {
     "xonsh": "#",
 }
 
-HOOK_SCRIPTS = {
-    "posix": "uve-posix.sh",
-    "cshell": "uve-cshell.csh",
-    "fish": "uve-fish.fish",
-    "powershell": "uve-powershell.ps1",
-    "cmd": "uve-cmd.bat",
-    "nushell": "uve-nushell.nu",
-    "xonsh": "uve-xonsh.xsh",
-}
 
-
-def gen_shell_hook_call_insertion(shell_family: str) -> str:
+def render_shell_hook_call_insertion(shell_family: str) -> str:
     comment = COMMENT_MARKERS.get(shell_family, None)
 
     if comment is None:
@@ -39,12 +30,12 @@ def gen_shell_hook_call_insertion(shell_family: str) -> str:
 
     return (
         f"{comment} uv-global-wrapper-hook-call-init\n"
-        f"{gen_shell_hook_call(shell_family)}\n"
+        f"{render_shell_hook_call(shell_family)}\n"
         f"{comment} uv-global-wrapper-hook-call-end"
     )
 
 
-def gen_shell_hook_call(shell_family: str) -> str:
+def render_shell_hook_call(shell_family: str) -> str:
     hook_script_location = hook_script_path(abs_path=False)
     posix_location = path_as_posix(hook_script_location)
     windows_location = path_as_windows(hook_script_location)
@@ -68,15 +59,15 @@ def gen_shell_hook_call(shell_family: str) -> str:
     return hook_call
 
 
-def gen_shell_hook_script(shell_family: str) -> str:
+def render_shell_hook_script(shell_family: str) -> str:
     hook_scripts_dict = {
-        "posix": gen_posix_hook_script,
-        "cshell": gen_cshell_hook_script,
-        "fish": gen_fish_hook_script,
-        "powershell": gen_powershell_hook_script,
-        "cmd": gen_cmd_hook_script,
-        "nushell": gen_nushell_hook_script,
-        "xonsh": gen_xonsh_hook_script,
+        "posix": template_posix_hook_script,
+        "cshell": template_cshell_hook_script,
+        "fish": template_fish_hook_script,
+        "powershell": template_powershell_hook_script,
+        "cmd": template_cmd_hook_script,
+        "nushell": template_nushell_hook_script,
+        "xonsh": template_xonsh_hook_script,
     }
 
     hook_script_function = hook_scripts_dict.get(shell_family, None)
@@ -87,7 +78,7 @@ def gen_shell_hook_script(shell_family: str) -> str:
     return hook_script_function()
 
 
-def gen_posix_hook_script() -> str:
+def template_posix_hook_script() -> str:
     return dedent("""
         uve() {
             if [ "$1" = "activate" ] &&
@@ -106,13 +97,13 @@ def gen_posix_hook_script() -> str:
     """).strip()
 
 
-def gen_cshell_hook_script() -> str:
+def template_cshell_hook_script() -> str:
     return dedent(r"""
         alias uve 'if ("!:1" == "activate" && "!:2" != "" && "!:2" != "-h" && "!:2" != "--help") then; eval `\uve activate "\!:2" --hook`; else; \uve !\*; endif'
     """).strip()
 
 
-def gen_fish_hook_script() -> str:
+def template_fish_hook_script() -> str:
     return dedent("""
         function uve
             if test (count $argv) -ge 2
@@ -132,7 +123,7 @@ def gen_fish_hook_script() -> str:
     """).strip()
 
 
-def gen_powershell_hook_script() -> str:
+def template_powershell_hook_script() -> str:
     return dedent("""
         $uve_command = (Get-Command uve -CommandType Application).Source
 
@@ -158,7 +149,7 @@ def gen_powershell_hook_script() -> str:
     """).strip()
 
 
-def gen_cmd_hook_script() -> str:
+def template_cmd_hook_script() -> str:
     return dedent(r"""
         @echo off
 
@@ -179,7 +170,7 @@ def gen_cmd_hook_script() -> str:
     """).strip()
 
 
-def gen_nushell_hook_script() -> str:
+def template_nushell_hook_script() -> str:
     root_folder = path_as_posix(venvs_root_path(abs_path=False))
     script_folder = venv_script_folder_name()
     return dedent(f"""
@@ -258,7 +249,7 @@ def gen_nushell_hook_script() -> str:
     """).strip()
 
 
-def gen_xonsh_hook_script() -> str:
+def template_xonsh_hook_script() -> str:
     return dedent("""
         import subprocess
         import sys
@@ -289,4 +280,4 @@ def gen_xonsh_hook_script() -> str:
 
 
 if __name__ == "__main__":
-    print(__name__)
+    print("Breakpoint Here")
