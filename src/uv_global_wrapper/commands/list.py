@@ -5,7 +5,10 @@ import re
 from pathlib import Path
 
 from ..common.paths import venvs_root_path
-from ..common.utils import print_table
+from ..common.utils import (
+    parse_pyvenv_cfg,
+    print_table,
+)
 
 
 def register(subparsers):
@@ -100,15 +103,6 @@ def list_run(args: argparse.Namespace):
         headers = ["Environment"]
 
     print(print_table(headers, rows))
-
-
-def parse_pyvenv_cfg(path: Path) -> dict[str, str]:
-    config = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        key, separator, value = line.partition("=")
-        if separator:
-            config[key.strip()] = value.strip()
-    return config
 
 
 def load_environment_data(environments: list[Path]) -> list[dict[str, str]]:

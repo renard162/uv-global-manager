@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import shutil
 import sys
+from pathlib import Path
 
 from shellingham import ShellDetectionFailure, detect_shell
 
@@ -79,3 +80,15 @@ def print_table(headers: list[str], rows: list[list[str]]) -> str:
     ]
 
     return "\n".join(lines)
+
+
+def parse_pyvenv_cfg(path: Path) -> dict[str, str]:
+    config = {}
+
+    for line in path.read_text(encoding="utf-8").splitlines():
+        key, separator, value = line.partition("=")
+
+        if separator:
+            config[key.strip()] = value.strip()
+
+    return config

@@ -14,7 +14,10 @@ from ..common.repository import (
     download_package,
     run_package,
 )
-from ..common.utils import print_stderr
+from ..common.utils import (
+    parse_pyvenv_cfg,
+    print_stderr,
+)
 
 
 def register(subparsers):
@@ -93,6 +96,10 @@ def register(subparsers):
 
 
 def makeproject_run(args: argparse.Namespace):
+    if args.name is None:
+        args.parser.print_help()
+        return
+
     active_env_path = active_venv_path()
 
     if active_env_path is None:
@@ -117,16 +124,6 @@ def makeproject_run(args: argparse.Namespace):
             f'The destination directory "{target_path}" already exists.'
         )
 
-    implementation = _venv_config_value(
-        active_env_path,
-        "implementation",
-    )
-
-    use_pip_freeze = implementation != "CPython"
-
-    if not use_pip_freeze:
-        use_pip_freeze = not _ensure_pipdeptree()
-
     _init_project(
         target_path=target_path,
         python_path=python_path,
@@ -135,6 +132,14 @@ def makeproject_run(args: argparse.Namespace):
     )
 
     requirements_path = target_path / "requirements.txt"
+
+    venv_config = parse_pyvenv_cfg(active_env_path / "pyvenv.cfg")
+    implementation = venv_config.get("implementation")
+    if implementation is None:
+        print_stderr('Warning: The "implementation" key was not found in pyvenv.cfg.')
+    use_pip_freeze = implementation != "CPython"
+    if not use_pip_freeze:
+        use_pip_freeze = not _ensure_pipdeptree()
 
     _export_requirements(
         python_path=python_path,
@@ -146,31 +151,6 @@ def makeproject_run(args: argparse.Namespace):
         target_path=target_path,
         requirements_path=requirements_path,
         bare=args.bare,
-    )
-
-
-def _venv_config_value(
-    venv_path: Path,
-    key: str,
-) -> str:
-    config_path = venv_path / "pyvenv.cfg"
-
-    try:
-        content = config_path.read_text(encoding="utf-8")
-    except OSError as exc:
-        raise RuntimeError(
-            "Unable to read the active virtual environment configuration "
-            f'"{config_path}".'
-        ) from exc
-
-    prefix = f"{key} ="
-
-    for line in content.splitlines():
-        if line.startswith(prefix):
-            return line.split("=", 1)[1].strip()
-
-    raise RuntimeError(
-        f'The active virtual environment configuration does not define "{key}".'
     )
 
 
@@ -347,7 +327,6 @@ def _add_requirements(
         return
 
     old_virtual_env = os.environ.pop("VIRTUAL_ENV", None)
-
     try:
         subprocess.run(
             [
