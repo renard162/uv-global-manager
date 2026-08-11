@@ -295,16 +295,35 @@ def generate_stats(
     for environment in environments:
         key = (
             environment["implementation"],
-            parse_python_version(environment["version_info"]),
+            environment["version_info"],
         )
 
         stats[key] = stats.get(key, 0) + 1
 
-    return [
-        [
-            implementation,
-            ".".join(str(part) for part in version),
-            str(count),
-        ]
-        for (implementation, version), count in sorted(stats.items())
-    ]
+    rows = []
+    previous_implementation = None
+
+    for (implementation, version), count in sorted(
+        stats.items(),
+        key=lambda item: (
+            item[0][0],
+            parse_python_version(item[0][1]),
+        ),
+    ):
+        if (
+            previous_implementation is not None
+            and implementation != previous_implementation
+        ):
+            rows.append(["", "", ""])
+
+        rows.append(
+            [
+                implementation,
+                version,
+                str(count),
+            ]
+        )
+
+        previous_implementation = implementation
+
+    return rows
