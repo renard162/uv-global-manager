@@ -49,7 +49,9 @@ def register(subparsers):
         ),
     )
 
-    parser.add_argument(
+    project_type = parser.add_mutually_exclusive_group()
+
+    project_type.add_argument(
         "--bounds",
         choices=("lower", "major", "minor", "exact"),
         default="exact",
@@ -58,8 +60,6 @@ def register(subparsers):
             "Choices: lower, major, minor, exact. Defaults to exact."
         ),
     )
-
-    project_type = parser.add_mutually_exclusive_group()
 
     project_type.add_argument(
         "--app",
