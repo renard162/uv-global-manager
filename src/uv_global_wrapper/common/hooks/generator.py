@@ -79,31 +79,5 @@ def generate_script(script_path: Path, content: str) -> None:
     script_path.write_text(content, encoding="utf-8")
 
 
-def backup_file(path: Path) -> str | None:
-    if not path.is_file():
-        return
-
-    backup_files = list(path.parent.glob(f"{path.name}.bak*"))
-
-    if not backup_files:
-        backup_path = path.with_name(f"{path.name}.bak")
-    else:
-        backup_files.sort(
-            key=lambda backup: backup.suffix,
-        )
-
-        suffix = backup_files[-1].suffix.removeprefix(".bak")
-
-        if suffix.isdigit():
-            suffix = str(int(suffix) + 1)
-        else:
-            suffix += "0"
-
-        backup_path = path.with_name(f"{path.name}.bak{suffix}")
-
-    shutil.copy2(path, backup_path)
-    return backup_path.name
-
-
 if __name__ == "__main__":
     print("Breakpoint Here")
