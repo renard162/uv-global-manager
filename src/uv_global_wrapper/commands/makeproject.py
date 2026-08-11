@@ -124,7 +124,7 @@ def makeproject_run(args: argparse.Namespace):
             f'The destination directory "{target_path}" already exists.'
         )
 
-    _init_project(
+    init_project(
         target_path=target_path,
         python_path=python_path,
         bare=args.bare,
@@ -139,22 +139,22 @@ def makeproject_run(args: argparse.Namespace):
         print_stderr('Warning: The "implementation" key was not found in pyvenv.cfg.')
     use_pip_freeze = implementation != "CPython"
     if not use_pip_freeze:
-        use_pip_freeze = not _ensure_pipdeptree()
+        use_pip_freeze = not ensure_pipdeptree()
 
-    _export_requirements(
+    export_requirements(
         python_path=python_path,
         requirements_path=requirements_path,
         use_pip_freeze=use_pip_freeze,
     )
 
-    _add_requirements(
+    add_requirements(
         target_path=target_path,
         requirements_path=requirements_path,
         bare=args.bare,
     )
 
 
-def _ensure_pipdeptree() -> bool:
+def ensure_pipdeptree() -> bool:
     if check_package_call(
         "pipdeptree",
         raise_on_fail=False,
@@ -189,7 +189,7 @@ def _ensure_pipdeptree() -> bool:
     return False
 
 
-def _init_project(
+def init_project(
     target_path: Path,
     python_path: Path,
     bare: bool,
@@ -219,30 +219,27 @@ def _init_project(
         raise RuntimeError("uv init failed.") from exc
 
 
-def _export_requirements(
+def export_requirements(
     python_path: Path,
     requirements_path: Path,
     use_pip_freeze: bool,
 ) -> None:
     if use_pip_freeze:
-        _export_with_pip_freeze(
+        export_with_pip_freeze(
             python_path,
             requirements_path,
         )
         return
 
-    pipdeptree_success = _export_with_pipdeptree(
-        requirements_path,
-    )
-
+    pipdeptree_success = export_with_pipdeptree(requirements_path)
     if not pipdeptree_success:
-        _export_with_pip_freeze(
+        export_with_pip_freeze(
             python_path,
             requirements_path,
         )
 
 
-def _export_with_pipdeptree(
+def export_with_pipdeptree(
     requirements_path: Path,
 ) -> bool:
     result = run_package(
@@ -264,7 +261,7 @@ def _export_with_pipdeptree(
     return True
 
 
-def _export_with_pip_freeze(
+def export_with_pip_freeze(
     python_path: Path,
     requirements_path: Path,
 ) -> None:
@@ -296,7 +293,7 @@ def _export_with_pip_freeze(
     )
 
 
-def _add_requirements(
+def add_requirements(
     target_path: Path,
     requirements_path: Path,
     bare: bool,
