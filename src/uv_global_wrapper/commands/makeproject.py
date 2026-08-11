@@ -34,10 +34,7 @@ def register(subparsers):
     parser.add_argument(
         "name",
         nargs="?",
-        help=(
-            "Target project directory. If omitted, the active virtual "
-            "environment name is used."
-        ),
+        help=("Project name. The project directory is created using this name."),
     )
 
     parser.add_argument(
