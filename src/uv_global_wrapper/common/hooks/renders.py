@@ -34,16 +34,12 @@ COMMENT_MARKERS = {
 
 
 def render_shell_hook_call_insertion(shell_family: str) -> str:
-    comment = COMMENT_MARKERS.get(shell_family, None)
-
-    if comment is None:
-        raise ShellDetectionFailure(f"Unsupported shell family: {shell_family}")
-
     return (
         "\n"
-        f"{comment} {HOOK_MARKER}-init\n"
-        f"{render_shell_hook_call(shell_family)}\n"
-        f"{comment} {HOOK_MARKER}-end\n"
+        f"{render_insert_block_marker_init(shell_family)}"
+        f"{render_shell_hook_call(shell_family)}"
+        f"{render_insert_block_marker_end(shell_family)}"
+        "\n"
     )
 
 
@@ -88,6 +84,16 @@ def render_shell_hook_script(shell_family: str) -> str:
         raise ShellDetectionFailure(f"Unsupported shell family: {shell_family}")
 
     return hook_script_function()
+
+
+def render_insert_block_marker_init(shell_family: str):
+    comment = COMMENT_MARKERS[shell_family]
+    return f"{comment} {HOOK_MARKER}-init\n"
+
+
+def render_insert_block_marker_end(shell_family: str):
+    comment = COMMENT_MARKERS[shell_family]
+    return f"\n{comment} {HOOK_MARKER}-end"
 
 
 def template_posix_hook_script() -> str:

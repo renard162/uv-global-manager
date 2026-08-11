@@ -3,9 +3,9 @@ from pathlib import Path
 
 from ..paths import hook_script_path
 from .renders import (
-    COMMENT_MARKERS,
-    HOOK_MARKER,
     HOOK_SCRIPT_NAMES,
+    render_insert_block_marker_end,
+    render_insert_block_marker_init,
     render_shell_hook_call,
     render_shell_hook_call_insertion,
     render_shell_hook_script,
@@ -42,29 +42,37 @@ def generate_hook_launcher_script(folder_path: Path, shell_family: str) -> None:
     )
 
 
-def insert_hook_launcher_command(script_path: Path, shell_family: str) -> None:
-    backup_file(script_path)
+def insert_hook_launcher_code_block(script_path: Path, shell_family: str) -> None:
     hook_call_string = render_shell_hook_call_insertion(shell_family)
     with script_path.open("ab") as file:
         file.write(hook_call_string.encode("ascii"))
 
 
-def find_hook_block(script_path: Path, shell_family: str) -> tuple[int, int] | None:
-    comment = COMMENT_MARKERS[shell_family]
-    start_marker = (f"{comment} {HOOK_MARKER}-init").encode("ascii")
-    end_marker = (f"{comment} {HOOK_MARKER}-end").encode("ascii")
-    content = script_path.read_bytes()
+def find_hook_launcher_code_block(
+    script_path: Path, shell_family: str
+) -> tuple[int, int] | None:
+    start_marker = render_insert_block_marker_init(shell_family).encode("ascii")
+    end_marker = render_insert_block_marker_end(shell_family).encode("ascii")
+    script_content = script_path.read_bytes()
 
-    start = content.find(start_marker)
+    start = script_content.find(start_marker)
     if start == -1:
         return None
 
-    end = content.find(end_marker, start + len(start_marker))
+    end = script_content.find(end_marker, start + len(start_marker))
     if end == -1:
         return None
 
     end += len(end_marker)
     return start, end
+
+
+def remove_hook_launcher_code_block(
+    script_path: Path, block_positions: tuple[int, int]
+) -> None:
+    start, end = block_positions
+    content = script_path.read_bytes()
+    script_path.write_bytes(content[:start] + content[end:])
 
 
 def generate_script(script_path: Path, content: str) -> None:
