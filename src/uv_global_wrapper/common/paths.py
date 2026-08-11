@@ -44,6 +44,13 @@ def venv_interpreter_path(venv_name: str, abs_path=True) -> Path:
     return interpreter_dict.get(os.name, Path("__error"))
 
 
+def active_venv_path() -> Path | None:
+    venv = os.environ.get("VIRTUAL_ENV")
+    if venv is None:
+        return None
+    return Path(venv)
+
+
 def path_as_posix(base_path: Path) -> str:
     return base_path.as_posix()
 
