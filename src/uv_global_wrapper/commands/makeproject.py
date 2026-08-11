@@ -29,6 +29,7 @@ def register(subparsers):
         description=(
             "Generates a UV project template from the active virtual environment."
         ),
+        allow_abbrev=False,
     )
 
     parser.add_argument(
