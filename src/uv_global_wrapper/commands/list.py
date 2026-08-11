@@ -21,8 +21,8 @@ def register(subparsers):
     )
 
     parser.add_argument(
-        "-a",
-        "--all",
+        "-d",
+        "--details",
         action="store_true",
         help="Show additional information about each virtual environment.",
     )
