@@ -46,7 +46,7 @@ def register(subparsers):
         default="exact",
         help=(
             "Specify the version bounds to apply to project dependencies. "
-            "Choices: lower, major, minor, exact. Defaults to exact."
+            "Choices: lower, major, minor, exact. Defaults to exact. Use 'uv help add' for more informations."
         ),
     )
 
