@@ -94,3 +94,18 @@ def parse_pyvenv_cfg(path: Path) -> dict[str, str]:
             config[key.strip()] = value.strip()
 
     return config
+
+
+def create_path_tree(target_path: Path) -> None:
+    home = Path.home()
+
+    if not home.exists():
+        raise FileNotFoundError(f'Home directory does not exist: "{home}"')
+
+    target_path = target_path.absolute()
+    relative_path = target_path.relative_to(home)
+
+    current = home
+    for part in relative_path.parts:
+        current /= part
+        current.mkdir(exist_ok=True)
