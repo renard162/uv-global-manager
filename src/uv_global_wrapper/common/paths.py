@@ -11,6 +11,10 @@ def venvs_root_path(abs_path=True) -> Path:
     return root_folder
 
 
+def backup_folder_path(abs_path=True) -> Path:
+    return venvs_root_path(abs_path) / "Backup"
+
+
 def resources_path(abs_path=True) -> Path:
     return venvs_root_path(abs_path) / ".resources"
 
