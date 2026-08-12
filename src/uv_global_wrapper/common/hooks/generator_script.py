@@ -1,7 +1,7 @@
 import shutil
 from pathlib import Path
 
-from ..paths import hook_script_path
+from ..paths import backup_folder_path, hook_script_path
 from .renders import (
     HOOK_SCRIPT_NAMES,
     render_insert_block_marker_end,
@@ -86,10 +86,11 @@ def backup_file(path: Path) -> tuple[str | None, bool]:
         return None, False
 
     try:
-        backup_files = list(path.parent.glob(f"{path.name}.bak*"))
+        backup_folder = backup_folder_path()
+        backup_files = list(backup_folder.glob(f"{path.name}.bak*"))
 
         if not backup_files:
-            backup_path = path.with_name(f"{path.name}.bak")
+            backup_path = backup_folder / f"{path.name}.bak"
         else:
             backup_files.sort(key=lambda bck: bck.suffix)
             suffix = backup_files[-1].suffix.removeprefix(".bak")
@@ -99,7 +100,7 @@ def backup_file(path: Path) -> tuple[str | None, bool]:
             else:
                 suffix += "0"
 
-            backup_path = path.with_name(f"{path.name}.bak{suffix}")
+            backup_path = backup_folder / f"{path.name}.bak{suffix}"
 
         shutil.copy2(path, backup_path)
 
