@@ -1,7 +1,9 @@
 import re
 import winreg
 from dataclasses import dataclass
+from datetime import datetime
 
+from ..paths import venvs_root_path
 from .renders import HOOK_SCRIPT_NAMES, render_shell_hook_call
 
 AUTORUN_KEY = r"Software\Microsoft\Command Processor"
@@ -71,6 +73,55 @@ def find_hook_launcher_win_reg() -> tuple[int, int] | None:
         command_end=command_end,
         context=context,
     )
+
+
+def backup_autorun() -> tuple[str, bool]:
+    now = datetime.now().astimezone()
+    backup_path = venvs_root_path() / f"backup-{now:%Y%m%d-%H%M%S}.reg"
+
+    try:
+        try:
+            with winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                AUTORUN_KEY,
+                access=winreg.KEY_READ,
+            ) as key:
+                value, value_type = winreg.QueryValueEx(
+                    key,
+                    "AutoRun",
+                )
+        except FileNotFoundError:
+            value = None
+            value_type = None
+
+        if value is None:
+            content = (
+                "Windows Registry Editor Version 5.00\n"
+                "\n"
+                f"[HKEY_CURRENT_USER\\{AUTORUN_KEY}]\n"
+                '"AutoRun"=-\n'
+            )
+        elif value_type == winreg.REG_SZ:
+            escaped_value = value.replace('"', r"\"")
+
+            content = (
+                "Windows Registry Editor Version 5.00\n"
+                "\n"
+                rf"[HKEY_CURRENT_USER\{AUTORUN_KEY}]\n"
+                rf'"AutoRun"="{escaped_value}"\n'
+            )
+        else:
+            return f"Unsupported registry type for AutoRun: {value_type}.", True
+
+        backup_path.write_text(
+            content,
+            encoding="utf-16",
+        )
+
+    except OSError as exc:
+        return str(exc), True
+
+    return str(backup_path), False
 
 
 def read_autorun() -> str | None:
