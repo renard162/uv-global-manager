@@ -195,9 +195,7 @@ def print_installation_plan(
     shell_name: str,
     shell_family: str,
 ):
-    print()
-    print("The following changes will be made:")
-    print()
+    print("\nThe following changes will be made:\n")
     print(f"Shell: {shell_name} ({shell_family})")
     print()
 
@@ -258,8 +256,7 @@ def print_installation_backup(plan: InstallationPlan):
     if not plan.backup:
         return
 
-    print()
-    print("Backup:")
+    print("\nBackup:")
 
     if plan.win_reg_edit:
         print("  A backup of the Windows registry CMD AutoRun value")
@@ -293,7 +290,15 @@ def execute_installation_plan(
     profile_path = plan.profile_path
 
     if plan.backup:
-        backup_file(path=profile_path)
+        backup_message, backup_error = backup_file(path=profile_path)
+
+        if backup_message is not None:
+            if backup_error:
+                print("Error generating backup file:\n")
+                print(backup_message)
+            else:
+                print("Generated backup file:\n")
+                print(backup_message)
 
     if plan.action in {"create", "overwrite"}:
         generate_hook_launcher_script(
@@ -339,7 +344,14 @@ def execute_windows_registry_installation(
     plan: InstallationPlan,
 ):
     if plan.backup:
-        backup_autorun_win_reg()
+        backup_message, backup_error = backup_autorun_win_reg()
+
+        if backup_error:
+            print("Error generating Windows registry backup:\n")
+            print(backup_message)
+        else:
+            print("Generated Windows registry backup:\n")
+            print(backup_message)
 
     if plan.action == "insert_reg":
         add_hook_launcher_to_autorun_reg()
