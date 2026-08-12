@@ -6,7 +6,7 @@ from .generator_script import HOOK_LAUNCHER_SCRIPT_NAME, SCRIPT_EXTENSIONS
 AUTORUN_KEY = r"Software\Microsoft\Command Processor\AutoRun"
 
 
-def find_hook_command_in_autorun() -> tuple[int, int] | None:
+def find_hook_launcher_win_reg() -> tuple[int, int] | None:
     script_name = f"{HOOK_LAUNCHER_SCRIPT_NAME}.{SCRIPT_EXTENSIONS['cmd']}"
     autorun = read_autorun()
 
