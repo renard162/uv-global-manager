@@ -1,5 +1,6 @@
 import re
 import winreg
+from dataclasses import dataclass
 
 from .generator_script import HOOK_LAUNCHER_SCRIPT_NAME, SCRIPT_EXTENSIONS
 
@@ -477,22 +478,22 @@ def extend_start_and_end(value: str, start: int, end: int) -> tuple[int, int]:
     return start, end
 
 
+@dataclass
 class RegSeparator:
-    def __init__(self, start: int, end: int, depth: int, group: "RegGroup | None"):
-        self.start = start
-        self.end = end
-        self.depth = depth
-        self.group = group
+    start: int
+    end: int
+    depth: int
+    group: "RegGroup | None"
 
 
+@dataclass
 class RegGroup:
-    def __init__(self, start: int, end: int | None, parent: int | None):
-        self.start = start
-        self.end = end
-        self.parent = parent
+    start: int
+    end: int | None
+    parent: int | None
 
 
+@dataclass
 class RegCmdStructure:
-    def __init__(self, separators: list[RegSeparator], groups: list[RegGroup]):
-        self.separators = separators
-        self.groups = groups
+    separators: list[RegSeparator]
+    groups: list[RegGroup]
