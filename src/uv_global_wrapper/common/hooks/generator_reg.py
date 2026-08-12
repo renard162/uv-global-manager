@@ -75,7 +75,7 @@ def find_hook_launcher_win_reg() -> tuple[int, int] | None:
     )
 
 
-def backup_autorun() -> tuple[str, bool]:
+def backup_autorun_win_reg() -> tuple[str, bool]:
     now = datetime.now().astimezone()
     backup_path = venvs_root_path() / f"backup-{now:%Y%m%d-%H%M%S}.reg"
 

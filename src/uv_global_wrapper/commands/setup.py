@@ -5,7 +5,14 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
+from ..common.hooks.generator_reg import (
+    add_hook_launcher_to_autorun_reg,
+    backup_autorun_win_reg,
+    find_hook_launcher_win_reg,
+    remove_hook_launcher_from_autorun_reg,
+)
 from ..common.hooks.generator_script import (
+    backup_file,
     find_hook_launcher_code_block,
     generate_hook_launcher_script,
     generate_hook_script,
@@ -39,11 +46,13 @@ def register(subparsers):
     install_group.add_argument(
         "--install",
         nargs="?",
+        default=False,
         metavar="PROFILE",
     )
     install_group.add_argument(
         "--reinstall",
         nargs="?",
+        default=False,
         metavar="PROFILE",
     )
 
@@ -51,13 +60,13 @@ def register(subparsers):
 
 
 def setup_run(args: argparse.Namespace):
-    if args.install is None and args.reinstall is None:
+    if args.install is False and args.reinstall is False:
         args.parser.print_help()
         return
 
     shell_name, shell_family = get_parent_shell()
 
-    if args.install is not None:
+    if args.install is not False:
         install(
             profile=args.install,
             shell_name=shell_name,
@@ -66,17 +75,12 @@ def setup_run(args: argparse.Namespace):
         )
         return
 
-    if args.reinstall is not None:
-        install(
-            profile=args.reinstall,
-            shell_name=shell_name,
-            shell_family=shell_family,
-            reinstall=True,
-        )
-        return
-
-    if shell_family != "cmd":
-        raise ValueError("A profile must be specified with --install or --reinstall.")
+    install(
+        profile=args.reinstall,
+        shell_name=shell_name,
+        shell_family=shell_family,
+        reinstall=True,
+    )
 
 
 def install(
@@ -84,17 +88,17 @@ def install(
     shell_name: str,
     shell_family: str,
     reinstall: bool,
-):
-    if (profile is None) and (shell_family != "cmd"):
+) -> None:
+    if profile is None and shell_family != "cmd":
         raise ValueError("A profile must be specified with --install or --reinstall.")
 
-    profile_path = None if (profile is None) else Path(profile).expanduser().resolve()
+    profile_path = None if profile is None else Path(profile).expanduser().resolve()
 
     plan = build_installation_plan(
         profile_path=profile_path,
         shell_family=shell_family,
         reinstall=reinstall,
-        win_reg_edit=(profile is None),
+        win_reg_edit=profile is None,
     )
 
     print_installation_plan(
@@ -121,8 +125,12 @@ def build_installation_plan(
     reinstall: bool,
     win_reg_edit: bool,
 ) -> InstallationPlan:
+    if win_reg_edit:
+        if shell_family != "cmd" or profile_path is not None:
+            raise ValueError("Invalid Windows registry installation state.")
 
-    if (profile_path is None) and (shell_family == "cmd"):
+        block = find_hook_launcher_win_reg()
+
         if block is None:
             action = "insert_reg"
         elif reinstall:
@@ -133,10 +141,14 @@ def build_installation_plan(
         return InstallationPlan(
             profile_path=None,
             action=action,
-            win_reg_edit=False,
+            win_reg_edit=True,
+            backup=action in {"insert_reg", "replace_reg"},
         )
 
-    if (profile_path is None) or (not profile_path.exists()):
+    if profile_path is None:
+        raise ValueError("A profile must be specified with --install or --reinstall.")
+
+    if not profile_path.exists():
         raise FileNotFoundError(f'The profile "{profile_path}" does not exist.')
 
     if profile_path.is_dir():
@@ -171,8 +183,8 @@ def build_installation_plan(
         return InstallationPlan(
             profile_path=profile_path,
             action=action,
-            backup=action in {"insert", "replace"},
             win_reg_edit=False,
+            backup=action in {"insert", "replace"},
         )
 
     raise ValueError(f'The profile "{profile_path}" is neither a file nor a directory.')
@@ -219,9 +231,24 @@ def print_installation_action(plan: InstallationPlan):
         print("  Insert the hook launcher call at the end of the file.")
         return
 
+    if plan.action == "insert_reg":
+        print("Edit Windows registry:")
+        print("  Insert the hook launcher call in the CMD AutoRun value.")
+        return
+
+    if plan.action == "replace_reg":
+        print("Edit Windows registry:")
+        print("  Remove the existing hook launcher block.")
+        print("  Insert the hook launcher call in the CMD AutoRun value.")
+        return
+
     if plan.action == "skip":
-        print("No changes required:")
-        print(f"  = {plan.profile_path}")
+        if plan.win_reg_edit:
+            print("No changes required:")
+            print("  = Windows registry CMD AutoRun")
+        else:
+            print("No changes required:")
+            print(f"  = {plan.profile_path}")
         return
 
     raise RuntimeError(f"Unknown installation action: {plan.action}")
@@ -233,7 +260,12 @@ def print_installation_backup(plan: InstallationPlan):
 
     print()
     print("Backup:")
-    print(f"  A backup of {plan.profile_path} will be created before editing.")
+
+    if plan.win_reg_edit:
+        print("  A backup of the Windows registry CMD AutoRun value")
+        print("  will be created before editing.")
+    else:
+        print(f"  A backup of {plan.profile_path} will be created before editing.")
 
 
 def confirm_installation() -> bool:
@@ -248,42 +280,54 @@ def execute_installation_plan(
     if plan.action == "skip":
         return
 
+    if plan.win_reg_edit:
+        execute_windows_registry_installation(plan=plan)
+        return
+
+    if plan.profile_path is None:
+        raise RuntimeError(
+            "An installation plan without a profile path cannot be "
+            "executed as a file installation."
+        )
+
+    profile_path = plan.profile_path
+
     if plan.backup:
-        backup_file(path=plan.profile_path)
+        backup_file(path=profile_path)
 
     if plan.action in {"create", "overwrite"}:
         generate_hook_launcher_script(
-            folder_path=plan.profile_path.parent,
+            folder_path=profile_path.parent,
             shell_family=shell_family,
         )
         return
 
     if plan.action == "insert":
         insert_hook_launcher_code_block(
-            script_path=plan.profile_path,
+            script_path=profile_path,
             shell_family=shell_family,
         )
         return
 
     if plan.action == "replace":
         block = find_hook_launcher_code_block(
-            script_path=plan.profile_path,
+            script_path=profile_path,
             shell_family=shell_family,
         )
 
         if block is None:
             raise RuntimeError(
-                f'The hook launcher block in "{plan.profile_path}" '
+                f'The hook launcher block in "{profile_path}" '
                 "was removed before installation."
             )
 
         remove_hook_launcher_code_block(
-            script_path=plan.profile_path,
+            script_path=profile_path,
             block_positions=block,
         )
 
         insert_hook_launcher_code_block(
-            script_path=plan.profile_path,
+            script_path=profile_path,
             shell_family=shell_family,
         )
         return
@@ -291,24 +335,30 @@ def execute_installation_plan(
     raise RuntimeError(f"Unknown installation action: {plan.action}")
 
 
-def backup_file(path: Path) -> str | None:
-    if not path.is_file():
+def execute_windows_registry_installation(
+    plan: InstallationPlan,
+):
+    if plan.backup:
+        backup_autorun_win_reg()
+
+    if plan.action == "insert_reg":
+        add_hook_launcher_to_autorun_reg()
         return
 
-    backup_files = list(path.parent.glob(f"{path.name}.bak*"))
+    if plan.action == "replace_reg":
+        block = find_hook_launcher_win_reg()
 
-    if not backup_files:
-        backup_path = path.with_name(f"{path.name}.bak")
-    else:
-        backup_files.sort(key=lambda bck: bck.suffix)
-        suffix = backup_files[-1].suffix.removeprefix(".bak")
+        if block is None:
+            raise RuntimeError(
+                "The hook launcher block in the Windows registry "
+                "AutoRun value was removed before installation."
+            )
 
-        if suffix.isdigit():
-            suffix = str(int(suffix) + 1)
-        else:
-            suffix += "0"
+        remove_hook_launcher_from_autorun_reg(
+            block_positions=block,
+        )
 
-        backup_path = path.with_name(f"{path.name}.bak{suffix}")
+        add_hook_launcher_to_autorun_reg()
+        return
 
-    shutil.copy2(path, backup_path)
-    return backup_path.name
+    raise RuntimeError(f"Unknown registry installation action: {plan.action}")
