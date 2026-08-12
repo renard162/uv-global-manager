@@ -12,7 +12,10 @@ from ..common.paths import (
     venv_script_path,
     venvs_root_path,
 )
-from ..common.utils import print_stderr
+from ..common.utils import (
+    create_path_tree,
+    print_stderr,
+)
 
 
 def register(subparsers):
@@ -70,7 +73,7 @@ def create_run(args: argparse.Namespace):
             f'The virtual environment directory "{env_path}" already exists.'
         )
 
-    env_path.parent.mkdir(parents=True, exist_ok=True)
+    create_path_tree(env_path)
     requirements_path = None
 
     if args.requirements is not None:

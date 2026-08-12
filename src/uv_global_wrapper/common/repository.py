@@ -1,6 +1,7 @@
 import subprocess
 
 from .paths import repository_path
+from .utils import create_path_tree
 
 BASE_PYTHON_VERSION = "3.13"
 
@@ -13,6 +14,7 @@ def download_package(
 ) -> int:
     try:
         repository = repository_path()
+        create_path_tree(repository)
         subprocess.run(
             [
                 "uvx",

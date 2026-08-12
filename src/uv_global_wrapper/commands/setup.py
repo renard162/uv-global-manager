@@ -22,12 +22,14 @@ from ..common.hooks.generator_script import (
 )
 from ..common.hooks.renders import render_shell_hook_call
 from ..common.paths import (
+    backup_folder_path,
     hook_script_path,
     repository_path,
-    resources_path,
-    venvs_root_path,
 )
-from ..common.utils import get_parent_shell
+from ..common.utils import (
+    create_path_tree,
+    get_parent_shell,
+)
 
 
 @dataclass
@@ -60,7 +62,7 @@ def register(subparsers):
 
 
 def setup_run(args: argparse.Namespace):
-    if args.install is False and args.reinstall is False:
+    if (args.install is False) and (args.reinstall is False):
         args.parser.print_help()
         return
 
@@ -89,7 +91,7 @@ def install(
     shell_family: str,
     reinstall: bool,
 ) -> None:
-    if profile is None and shell_family != "cmd":
+    if (profile is None) and (shell_family != "cmd"):
         raise ValueError("A profile must be specified with --install or --reinstall.")
 
     profile_path = None if profile is None else Path(profile).expanduser().resolve()
@@ -111,8 +113,8 @@ def install(
         print("Installation aborted.")
         return
 
+    create_folder_tree()
     generate_hook_script(shell_family)
-
     execute_installation_plan(
         plan=plan,
         shell_family=shell_family,
@@ -270,10 +272,7 @@ def confirm_installation() -> bool:
     return answer in {"y", "yes"}
 
 
-def execute_installation_plan(
-    plan: InstallationPlan,
-    shell_family: str,
-):
+def execute_installation_plan(plan: InstallationPlan, shell_family: str):
     if plan.action == "skip":
         return
 
@@ -335,9 +334,7 @@ def execute_installation_plan(
     raise RuntimeError(f"Unknown installation action: {plan.action}")
 
 
-def execute_windows_registry_installation(
-    plan: InstallationPlan,
-):
+def execute_windows_registry_installation(plan: InstallationPlan):
     if plan.backup:
         backup_message, backup_error = backup_autorun_win_reg()
 
@@ -362,3 +359,14 @@ def execute_windows_registry_installation(
         return
 
     raise RuntimeError(f"Unknown registry installation action: {plan.action}")
+
+
+def create_folder_tree() -> None:
+    folder_tree = [
+        hook_script_path(),
+        repository_path(),
+        backup_folder_path(),
+    ]
+
+    for folder in folder_tree:
+        create_path_tree(folder)

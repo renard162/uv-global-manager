@@ -4,7 +4,11 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from ..paths import backup_folder_path
-from .renders import HOOK_SCRIPT_NAMES, render_shell_hook_call
+from ..utils import create_path_tree
+from .renders import (
+    HOOK_SCRIPT_NAMES,
+    render_shell_hook_call,
+)
 
 AUTORUN_KEY = r"Software\Microsoft\Command Processor"
 AUTORUN_VALUE = "AutoRun"
@@ -77,7 +81,9 @@ def find_hook_launcher_win_reg() -> tuple[int, int] | None:
 
 def backup_autorun_win_reg() -> tuple[str, bool]:
     now = datetime.now().astimezone()
-    backup_path = backup_folder_path() / f"backup-{now:%Y%m%d-%H%M%S}.reg"
+    backup_folder = backup_folder_path()
+    create_path_tree(backup_folder)
+    backup_path = backup_folder / f"backup-{now:%Y%m%d-%H%M%S}.reg"
 
     try:
         try:
