@@ -207,7 +207,7 @@ def parse_cmd_structure(value: str) -> "RegCmdStructure":
                     start=separator_start,
                     end=separator_end,
                     depth=len(group_stack),
-                    group=(group_stack[-1] if group_stack else None),
+                    group=(groups[group_stack[-1]] if group_stack else None),
                 )
             )
 
@@ -223,7 +223,7 @@ def parse_cmd_structure(value: str) -> "RegCmdStructure":
                     start=separator_start,
                     end=separator_end,
                     depth=len(group_stack),
-                    group=(group_stack[-1] if group_stack else None),
+                    group=(groups[group_stack[-1]] if group_stack else None),
                 )
             )
 
@@ -377,10 +377,7 @@ def get_next_separator(
 
 
 def same_group(separator: "RegSeparator", group: "RegGroup | None") -> bool:
-    if group is None:
-        return separator.group is None
-
-    return separator.group == id(group)
+    return separator.group is group
 
 
 def has_command_before(
@@ -481,7 +478,7 @@ def extend_start_and_end(value: str, start: int, end: int) -> tuple[int, int]:
 
 
 class RegSeparator:
-    def __init__(self, start: int, end: int, depth: int, group: int | None):
+    def __init__(self, start: int, end: int, depth: int, group: "RegGroup | None"):
         self.start = start
         self.end = end
         self.depth = depth
