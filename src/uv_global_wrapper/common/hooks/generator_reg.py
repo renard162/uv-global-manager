@@ -42,7 +42,7 @@ def read_autorun() -> str | None:
             access=winreg.KEY_READ,
         ) as key:
             try:
-                value, _ = winreg.QueryValueEx(key, None)
+                value, _ = winreg.QueryValueEx(key, "")
             except FileNotFoundError:
                 return None
 
@@ -113,11 +113,11 @@ def find_hook(value: str, script_name: str) -> tuple[int, int] | None:
 def path_ends_with_script(path: str, script_name: str) -> bool:
     path = path.casefold()
     script_name = script_name.casefold()
-
-    return (
-        path == script_name
-        or path.endswith(f"\\{script_name}")
-        or path.endswith(f"/{script_name}")
+    return path == script_name or path.endswith(
+        (
+            f"\\{script_name}",
+            f"/{script_name}",
+        )
     )
 
 
@@ -417,6 +417,9 @@ def expand_group_removal_range(
     group: "RegGroup",
     context: "RegCmdStructure",
 ) -> tuple[int, int]:
+    if group.end is None:
+        raise ValueError("Cannot expand an unclosed command group")
+
     start = group.start
     end = group.end + 1
 
