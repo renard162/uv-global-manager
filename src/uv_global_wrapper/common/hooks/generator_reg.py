@@ -8,7 +8,7 @@ from .renders import render_shell_hook_call
 AUTORUN_KEY = r"Software\Microsoft\Command Processor\AutoRun"
 
 
-def remove_hook_launcher_from_autorun(block_positions: tuple[int, int]) -> None:
+def remove_hook_launcher_from_autorun_reg(block_positions: tuple[int, int]) -> None:
     autorun = read_autorun()
 
     if autorun is None:
@@ -43,23 +43,19 @@ def remove_hook_launcher_from_autorun(block_positions: tuple[int, int]) -> None:
 
 
 def add_hook_launcher_to_autorun_reg() -> None:
+    autorun = read_autorun()
     hook_call = render_shell_hook_call("cmd")
+
+    if autorun is None:
+        autorun = hook_call
+    else:
+        autorun = f"{autorun} & {hook_call}"
 
     with winreg.CreateKeyEx(
         winreg.HKEY_CURRENT_USER,
         AUTORUN_KEY,
-        access=winreg.KEY_READ | winreg.KEY_WRITE,
+        access=winreg.KEY_SET_VALUE,
     ) as key:
-        if is_reg_key_empty(key):
-            autorun = hook_call
-        else:
-            value, _ = winreg.QueryValueEx(key, "")
-
-            if not isinstance(value, str):
-                raise TypeError("The AutoRun value must be a string")
-
-            autorun = f"{value} & {hook_call}"
-
         winreg.SetValueEx(key, "", 0, winreg.REG_SZ, autorun)
 
 
@@ -79,7 +75,6 @@ def find_hook_launcher_win_reg() -> tuple[int, int] | None:
         return None
 
     command_start, command_end = hook_match
-
     context = parse_cmd_structure(value=autorun)
 
     return get_removal_range(
@@ -530,15 +525,6 @@ def extend_start_and_end(value: str, start: int, end: int) -> tuple[int, int]:
         end += 1
 
     return start, end
-
-
-def is_reg_key_empty(key) -> bool:
-    try:
-        value, _ = winreg.QueryValueEx(key, "")
-    except FileNotFoundError:
-        return True
-
-    return not isinstance(value, str) or not value.strip()
 
 
 @dataclass
