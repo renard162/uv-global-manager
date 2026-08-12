@@ -5,7 +5,7 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
-from ..common.hooks.generator import (
+from ..common.hooks.generator_script import (
     find_hook_launcher_code_block,
     generate_hook_launcher_script,
     generate_hook_script,
@@ -13,6 +13,7 @@ from ..common.hooks.generator import (
     insert_hook_launcher_code_block,
     remove_hook_launcher_code_block,
 )
+from ..common.hooks.renders import render_shell_hook_call
 from ..common.paths import (
     hook_script_path,
     repository_path,
@@ -24,8 +25,9 @@ from ..common.utils import get_parent_shell
 
 @dataclass
 class InstallationPlan:
-    profile_path: Path
+    profile_path: Path | None
     action: str
+    win_reg_edit: bool
     backup: bool = False
 
 
@@ -73,45 +75,39 @@ def setup_run(args: argparse.Namespace):
         )
         return
 
-    if shell_family == "cmd":
-        return setup_cmd_without_profile()
-
-    raise ValueError("A profile must be specified with --install or --reinstall.")
+    if shell_family != "cmd":
+        raise ValueError("A profile must be specified with --install or --reinstall.")
 
 
 def install(
-    *,
     profile: str | None,
     shell_name: str,
     shell_family: str,
     reinstall: bool,
 ):
-    if profile is None:
-        if shell_family == "cmd":
-            return setup_cmd_without_profile()
-
+    if (profile is None) and (shell_family != "cmd"):
         raise ValueError("A profile must be specified with --install or --reinstall.")
 
-    profile_path = Path(profile).expanduser().resolve()
+    profile_path = None if (profile is None) else Path(profile).expanduser().resolve()
 
     plan = build_installation_plan(
         profile_path=profile_path,
         shell_family=shell_family,
         reinstall=reinstall,
+        win_reg_edit=(profile is None),
     )
 
     print_installation_plan(
         plan=plan,
         shell_name=shell_name,
         shell_family=shell_family,
-        reinstall=reinstall,
     )
 
     if not confirm_installation():
         print("Installation aborted.")
         return
 
-    generate_hook_script(shell_family=shell_family)
+    generate_hook_script(shell_family)
 
     execute_installation_plan(
         plan=plan,
@@ -120,18 +116,31 @@ def install(
 
 
 def build_installation_plan(
-    *,
-    profile_path: Path,
+    profile_path: Path | None,
     shell_family: str,
     reinstall: bool,
+    win_reg_edit: bool,
 ) -> InstallationPlan:
-    if not profile_path.exists():
+
+    if (profile_path is None) and (shell_family == "cmd"):
+        if block is None:
+            action = "insert_reg"
+        elif reinstall:
+            action = "replace_reg"
+        else:
+            action = "skip"
+
+        return InstallationPlan(
+            profile_path=None,
+            action=action,
+            win_reg_edit=False,
+        )
+
+    if (profile_path is None) or (not profile_path.exists()):
         raise FileNotFoundError(f'The profile "{profile_path}" does not exist.')
 
     if profile_path.is_dir():
-        launcher_path = profile_path / get_hook_launcher_script_name(
-            shell_family=shell_family
-        )
+        launcher_path = profile_path / get_hook_launcher_script_name(shell_family)
 
         if reinstall:
             action = "overwrite"
@@ -143,6 +152,7 @@ def build_installation_plan(
         return InstallationPlan(
             profile_path=launcher_path,
             action=action,
+            win_reg_edit=False,
         )
 
     if profile_path.is_file():
@@ -162,17 +172,16 @@ def build_installation_plan(
             profile_path=profile_path,
             action=action,
             backup=action in {"insert", "replace"},
+            win_reg_edit=False,
         )
 
     raise ValueError(f'The profile "{profile_path}" is neither a file nor a directory.')
 
 
 def print_installation_plan(
-    *,
     plan: InstallationPlan,
     shell_name: str,
     shell_family: str,
-    reinstall: bool,
 ):
     print()
     print("The following changes will be made:")
@@ -233,7 +242,6 @@ def confirm_installation() -> bool:
 
 
 def execute_installation_plan(
-    *,
     plan: InstallationPlan,
     shell_family: str,
 ):
@@ -281,12 +289,6 @@ def execute_installation_plan(
         return
 
     raise RuntimeError(f"Unknown installation action: {plan.action}")
-
-
-def setup_cmd_without_profile():
-    raise NotImplementedError(
-        "CMD installation without a profile is not implemented yet."
-    )
 
 
 def backup_file(path: Path) -> str | None:
