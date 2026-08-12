@@ -476,7 +476,7 @@ def expand_group_removal_range(
     has_next = next_separator is not None
 
     if has_next:
-        return extend_start_and_end(
+        return extend_start(
             value=value,
             start=start,
             end=next_separator.end,
