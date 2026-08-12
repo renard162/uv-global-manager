@@ -2,16 +2,13 @@ import re
 import winreg
 from dataclasses import dataclass
 
-from .generator_script import HOOK_LAUNCHER_SCRIPT_NAME, SCRIPT_EXTENSIONS
-from .renders import render_shell_hook_call
+from .renders import HOOK_SCRIPT_NAMES, render_shell_hook_call
 
 AUTORUN_KEY = r"Software\Microsoft\Command Processor"
 AUTORUN_VALUE = "AutoRun"
 
 
-def remove_hook_launcher_from_autorun_reg(
-    block_positions: tuple[int, int],
-) -> None:
+def remove_hook_launcher_from_autorun_reg(block_positions: tuple[int, int]) -> None:
     autorun = read_autorun()
 
     if autorun is None:
@@ -51,7 +48,7 @@ def add_hook_launcher_to_autorun_reg() -> None:
 
 
 def find_hook_launcher_win_reg() -> tuple[int, int] | None:
-    script_name = f"{HOOK_LAUNCHER_SCRIPT_NAME}.{SCRIPT_EXTENSIONS['cmd']}"
+    script_name = HOOK_SCRIPT_NAMES["cmd"]
     autorun = read_autorun()
 
     if autorun is None:
@@ -320,7 +317,7 @@ def get_removal_range(
         )
 
     if has_next_command and (next_separator is not None):
-        return extend_start_and_end(
+        return extend_start(
             value=value,
             start=command_start,
             end=next_separator.end,
@@ -504,6 +501,13 @@ def get_parent_group(groups: list["RegGroup"], group: "RegGroup") -> "RegGroup |
         return None
 
     return groups[group.parent]
+
+
+def extend_start(value: str, start: int, end: int) -> tuple[int, int]:
+    while start > 0 and value[start - 1].isspace():
+        start -= 1
+
+    return start, end
 
 
 def extend_start_and_end(value: str, start: int, end: int) -> tuple[int, int]:
