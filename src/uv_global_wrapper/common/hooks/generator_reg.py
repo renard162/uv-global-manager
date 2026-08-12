@@ -8,7 +8,41 @@ from .renders import render_shell_hook_call
 AUTORUN_KEY = r"Software\Microsoft\Command Processor\AutoRun"
 
 
-def add_hook_launcher_to_autorun() -> None:
+def remove_hook_launcher_from_autorun(block_positions: tuple[int, int]) -> None:
+    autorun = read_autorun()
+
+    if autorun is None:
+        return
+
+    start, end = block_positions
+
+    if not 0 <= start <= end <= len(autorun):
+        raise ValueError("Invalid AutoRun block positions")
+
+    remaining = autorun[:start] + autorun[end:]
+
+    if not remaining.strip():
+        winreg.DeleteKey(
+            winreg.HKEY_CURRENT_USER,
+            AUTORUN_KEY,
+        )
+        return
+
+    with winreg.OpenKey(
+        winreg.HKEY_CURRENT_USER,
+        AUTORUN_KEY,
+        access=winreg.KEY_SET_VALUE,
+    ) as key:
+        winreg.SetValueEx(
+            key,
+            "",
+            0,
+            winreg.REG_SZ,
+            remaining,
+        )
+
+
+def add_hook_launcher_to_autorun_reg() -> None:
     hook_call = render_shell_hook_call("cmd")
 
     with winreg.CreateKeyEx(
@@ -71,12 +105,7 @@ def read_autorun() -> str | None:
     except FileNotFoundError:
         return None
 
-    if not isinstance(value, str):
-        return None
-
-    value = value.strip()
-
-    if not value:
+    if not isinstance(value, str) or not value.strip():
         return None
 
     return value
