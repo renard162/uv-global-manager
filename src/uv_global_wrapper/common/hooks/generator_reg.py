@@ -323,21 +323,21 @@ def get_removal_range(
         group=group,
     )
 
-    if group is not None and not has_previous_command and not has_next_command:
+    if (group is not None) and (not has_previous_command) and (not has_next_command):
         return expand_group_removal_range(
             value=value,
             group=group,
             context=context,
         )
 
-    if has_next_command and next_separator is not None:
+    if has_next_command and (next_separator is not None):
         return extend_start_and_end(
             value=value,
             start=command_start,
             end=next_separator.end,
         )
 
-    if has_previous_command and previous_separator is not None:
+    if has_previous_command and (previous_separator is not None):
         return extend_start_and_end(
             value=value,
             start=previous_separator.start,
