@@ -5,10 +5,13 @@ from dataclasses import dataclass
 from .generator_script import HOOK_LAUNCHER_SCRIPT_NAME, SCRIPT_EXTENSIONS
 from .renders import render_shell_hook_call
 
-AUTORUN_KEY = r"Software\Microsoft\Command Processor\AutoRun"
+AUTORUN_KEY = r"Software\Microsoft\Command Processor"
+AUTORUN_VALUE = "AutoRun"
 
 
-def remove_hook_launcher_from_autorun_reg(block_positions: tuple[int, int]) -> None:
+def remove_hook_launcher_from_autorun_reg(
+    block_positions: tuple[int, int],
+) -> None:
     autorun = read_autorun()
 
     if autorun is None:
@@ -21,25 +24,13 @@ def remove_hook_launcher_from_autorun_reg(block_positions: tuple[int, int]) -> N
 
     remaining = autorun[:start] + autorun[end:]
 
-    if not remaining.strip():
-        winreg.DeleteKey(
-            winreg.HKEY_CURRENT_USER,
-            AUTORUN_KEY,
-        )
-        return
-
     with winreg.OpenKey(
-        winreg.HKEY_CURRENT_USER,
-        AUTORUN_KEY,
-        access=winreg.KEY_SET_VALUE,
+        winreg.HKEY_CURRENT_USER, AUTORUN_KEY, access=winreg.KEY_SET_VALUE
     ) as key:
-        winreg.SetValueEx(
-            key,
-            "",
-            0,
-            winreg.REG_SZ,
-            remaining,
-        )
+        if remaining.strip():
+            winreg.SetValueEx(key, AUTORUN_VALUE, 0, winreg.REG_SZ, remaining)
+        else:
+            winreg.DeleteValue(key, AUTORUN_VALUE)
 
 
 def add_hook_launcher_to_autorun_reg() -> None:
@@ -56,7 +47,7 @@ def add_hook_launcher_to_autorun_reg() -> None:
         AUTORUN_KEY,
         access=winreg.KEY_SET_VALUE,
     ) as key:
-        winreg.SetValueEx(key, "", 0, winreg.REG_SZ, autorun)
+        winreg.SetValueEx(key, AUTORUN_VALUE, 0, winreg.REG_SZ, autorun)
 
 
 def find_hook_launcher_win_reg() -> tuple[int, int] | None:
@@ -88,12 +79,10 @@ def find_hook_launcher_win_reg() -> tuple[int, int] | None:
 def read_autorun() -> str | None:
     try:
         with winreg.OpenKey(
-            winreg.HKEY_CURRENT_USER,
-            AUTORUN_KEY,
-            access=winreg.KEY_READ,
+            winreg.HKEY_CURRENT_USER, AUTORUN_KEY, access=winreg.KEY_READ
         ) as key:
             try:
-                value, _ = winreg.QueryValueEx(key, "")
+                value, _ = winreg.QueryValueEx(key, AUTORUN_VALUE)
             except FileNotFoundError:
                 return None
 
@@ -546,3 +535,7 @@ class RegGroup:
 class RegCmdStructure:
     separators: list[RegSeparator]
     groups: list[RegGroup]
+
+
+if __name__ == "__main__":
+    print("Breakpoint Here")
