@@ -320,16 +320,11 @@ def execute_installation_plan(
             shell_family=shell_family,
         )
 
-        if block is None:
-            raise RuntimeError(
-                f'The hook launcher block in "{profile_path}" '
-                "was removed before installation."
+        if block is not None:
+            remove_hook_launcher_code_block(
+                script_path=profile_path,
+                block_positions=block,
             )
-
-        remove_hook_launcher_code_block(
-            script_path=profile_path,
-            block_positions=block,
-        )
 
         insert_hook_launcher_code_block(
             script_path=profile_path,
@@ -360,15 +355,8 @@ def execute_windows_registry_installation(
     if plan.action == "replace_reg":
         block = find_hook_launcher_win_reg()
 
-        if block is None:
-            raise RuntimeError(
-                "The hook launcher block in the Windows registry "
-                "AutoRun value was removed before installation."
-            )
-
-        remove_hook_launcher_from_autorun_reg(
-            block_positions=block,
-        )
+        if block is not None:
+            remove_hook_launcher_from_autorun_reg(block)
 
         add_hook_launcher_to_autorun_reg()
         return
