@@ -190,8 +190,13 @@ def print_installation_plan(
     shell_name: str,
     shell_family: str,
 ):
+    shell_message = (
+        f"Shell: {shell_family}"
+        if (shell_name is None)
+        else f"Shell: {shell_name} ({shell_family})"
+    )
     print("\nThe following changes will be made:\n")
-    print(f"Shell: {shell_name} ({shell_family})")
+    print(shell_message)
     print()
 
     print_installation_action(
