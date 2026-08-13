@@ -54,6 +54,16 @@ def register(subparsers):
             "the local package repository."
         ),
         epilog=f"""\
+Supported Shells:
+    posix       : bash, ksh, zsh
+    cshell      : csh, tcsh
+    fish        : fish
+    nushell     : nu
+    xonsh       : xonsh
+    powershell  : pwsh, powershell
+    cmd         : cmd
+    clink-cmd   : cmd with clink addon
+
 Compatibility:
     cmd and csh have limited compatibility: only the shell hook is available,
     without autocomplete support. For cmd, install Clink and use the
@@ -64,9 +74,9 @@ Compatibility:
     Installing the cmd hook through {WIN_REGISTRY_PROFILE} modifies the
     Windows CMD AutoRun registry configuration. This can cause bugs or
     crashes in terminal programs that provide their own autorun mechanism,
-    such as ConEmu, Cmder, and even Clink. Prefer using the Clink addon for 
-    cmd and installing the hook through the clink-cmd shell option instead, 
-    as it provides additional functionality such as autocomplete and performs 
+    such as ConEmu, Cmder, and even Clink. Prefer using the Clink addon for
+    cmd and installing the hook through the clink-cmd shell option instead,
+    as it provides additional functionality such as autocomplete and performs
     autorun through a script, isolating the modification from other terminal programs.
 
 Examples:
