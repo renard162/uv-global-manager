@@ -39,7 +39,11 @@ from ..common.utils import (
 
 
 def register(subparsers):
-    parser = subparsers.add_parser("setup", allow_abbrev=False)
+    parser = subparsers.add_parser(
+        "setup",
+        allow_abbrev=False,
+        description="Install shell hooks, generate hook scripts, or manage the local package repository.",
+    )
 
     install_group = parser.add_mutually_exclusive_group()
 
@@ -48,6 +52,10 @@ def register(subparsers):
         nargs="?",
         default=False,
         metavar="PROFILE",
+        help=(
+            "Install shell integration. PROFILE may be a shell profile "
+            "file or directory. When omitted, CMD uses Windows AutoRun."
+        ),
     )
 
     install_group.add_argument(
@@ -55,40 +63,57 @@ def register(subparsers):
         nargs="?",
         default=False,
         metavar="PROFILE",
+        help=(
+            "Reinstall shell integration. PROFILE may be a shell profile "
+            "file or directory. Existing hook integration is replaced."
+        ),
     )
 
     install_group.add_argument(
         "--hook-script",
-        nargs="?",
-        default=False,
         metavar="SHELL",
-        help="Only generate the hook script for the specified shell family.",
+        choices=("posix", "cshell", "fish", "powershell", "cmd", "nushell", "xonsh"),
+        help=(
+            "Generate only the hook script for SHELL, without installing "
+            "it into a shell profile. Valid choices: "
+            "posix, cshell, fish, powershell, cmd, nushell, xonsh."
+        ),
     )
 
     install_group.add_argument(
         "--update-repo",
         action="store_true",
+        help="Update the local package repository to the latest package versions.",
     )
 
     install_group.add_argument(
         "--clear-repo",
         action="store_true",
+        help="Delete all files from the local package repository.",
     )
 
     parser.add_argument(
         "-s",
         "--shell",
         metavar="SHELL",
+        choices=("posix", "cshell", "fish", "powershell", "cmd", "nushell", "xonsh"),
+        help=(
+            "Select the shell explicitly instead of detecting it automatically. "
+            "Valid choices: posix, cshell, fish, powershell, cmd, nushell, xonsh."
+        ),
     )
 
-    parser.set_defaults(func=setup_run, parser=parser)
+    parser.set_defaults(
+        func=setup_run,
+        parser=parser,
+    )
 
 
 def setup_run(args: argparse.Namespace):
     if (
         (args.install is False)
         and (args.reinstall is False)
-        and (args.hook_script is False)
+        and (args.hook_script is None)
         and (not args.update_repo)
         and (not args.clear_repo)
     ):
@@ -103,7 +128,7 @@ def setup_run(args: argparse.Namespace):
         clear_repository()
         return
 
-    if args.hook_script is not False:
+    if args.hook_script is not None:
         shell_name, shell_family = None, args.hook_script
     elif args.shell is not None:
         shell_name, shell_family = None, args.shell
