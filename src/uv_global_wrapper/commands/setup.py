@@ -287,7 +287,7 @@ def print_installation_action(
         print("Edit file:")
         print(f"  ~ {plan.profile_path}")
         print(
-            f"  The command: {render_shell_hook_call(shell_family)} "
+            f"  The command:\n{render_shell_hook_call(shell_family)}\n"
             f"will be inserted at the end of {plan.profile_path.name}."
         )
         return
@@ -301,7 +301,7 @@ def print_installation_action(
         print(f"  ~ {plan.profile_path}")
         print("  Remove the existing hook launcher block.")
         print(
-            f"  The command: {render_shell_hook_call(shell_family)} "
+            f"  The command:\n{render_shell_hook_call(shell_family)}\n"
             f"will be inserted at the end of {plan.profile_path.name}."
         )
         return
@@ -309,11 +309,11 @@ def print_installation_action(
     if plan.action == "insert_reg":
         print("Edit Windows registry:")
         print(
-            f"  The command: {render_shell_hook_call(shell_family)} "
+            f"  The command:\n{render_shell_hook_call(shell_family)}\n"
             "will be added to the Windows AutoRun configuration."
         )
         print(
-            f"  WARNING: creating the value {AUTORUN_KEY!r} in the "
+            f"  WARNING: creating the value\n{AUTORUN_KEY!r}\nin the "
             f"registry key {AUTORUN_VALUE!r} can cause bugs in "
             "alternative shells such as Cmder."
         )
