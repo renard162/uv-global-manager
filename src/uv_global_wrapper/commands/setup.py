@@ -27,6 +27,7 @@ from ..common.paths import (
     backup_folder_path,
     hook_script_path,
     repository_path,
+    venvs_root_path,
 )
 from ..common.repository import (
     EXTERNAL_PACKAGES,
@@ -141,7 +142,7 @@ def setup_run(args: argparse.Namespace):
     else:
         shell_name, shell_family = get_parent_shell()
 
-    if args.hook_script is not False:
+    if args.hook_script is not None:
         install_hook_script_only(shell_family=shell_family)
         return
 
@@ -491,6 +492,7 @@ def create_folder_tree() -> None:
         hook_script_path(),
         repository_path(),
         backup_folder_path(),
+        venvs_root_path(),
     ]
 
     for folder in folder_tree:
