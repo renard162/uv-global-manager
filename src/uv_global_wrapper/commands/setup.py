@@ -75,6 +75,12 @@ def register(subparsers):
         action="store_true",
     )
 
+    parser.add_argument(
+        "-s",
+        "--shell",
+        metavar="SHELL",
+    )
+
     parser.set_defaults(func=setup_run, parser=parser)
 
 
@@ -99,6 +105,8 @@ def setup_run(args: argparse.Namespace):
 
     if args.hook_script is not False:
         shell_name, shell_family = None, args.hook_script
+    elif args.shell is not None:
+        shell_name, shell_family = None, args.shell
     else:
         shell_name, shell_family = get_parent_shell()
 
