@@ -8,7 +8,51 @@ from ...paths import (
 
 
 def template_clink_cmd_hook_script() -> str:
-    return dedent(r"""
+    commands = "\n".join(
+        (
+            f'                "{command}" .. venv_matcher,'
+            if command in {"activate", "delete"}
+            else f'                "{command}",'
+        )
+        for command in COMMANDS_DICT.values()
+    )
+
+    venvs_root = path_as_posix(venvs_root_path(abs_path=False))
+
+    return dedent(
+        f"""
+        local VENV_ROOT = "{venvs_root}"
+
+
+        local function venv_matches(word)
+            local root = rl.expandtilde("~\\\\" .. VENV_ROOT)
+
+            if not root then
+                return {{}}
+            end
+
+            local cwd = os.getcwd()
+
+            os.chdir(root)
+
+            local matches = clink.dirmatches(word)
+
+            os.chdir(cwd)
+
+            return matches
+        end
+
+
+        local venv_matcher = clink.argmatcher()
+            :addarg(venv_matches)
+
+
+        clink.argmatcher("uve")
+            :addarg({{
+{commands}
+            }})
+
+
         local function run_uve_hook(command)
             local pipe = io.popen(command, "r")
 
@@ -81,11 +125,12 @@ def template_clink_cmd_hook_script() -> str:
                 return nil
             end
 
-            return { output }
+            return {{ output }}
         end
 
 
         clink.onfilterinput(function(line)
             return handle_uve(line)
         end)
-    """).strip()
+        """
+    ).strip()
