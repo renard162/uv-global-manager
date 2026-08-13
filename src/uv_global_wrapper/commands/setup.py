@@ -54,6 +54,21 @@ def register(subparsers):
             "the local package repository."
         ),
         epilog=f"""\
+Compatibility:
+    cmd and csh have limited compatibility: only the shell hook is available,
+    without autocomplete support. For cmd, install Clink and use the
+    clink-cmd addon to provide full shell functionality, including
+    autocomplete. For csh, use tcsh instead, which provides the same
+    additional shell functionality, including autocomplete.
+
+    Installing the cmd hook through {WIN_REGISTRY_PROFILE} modifies the
+    Windows CMD AutoRun registry configuration. This can cause bugs or
+    crashes in terminal programs that provide their own autorun mechanism,
+    such as ConEmu, Cmder, and even Clink. Prefer using the Clink addon for 
+    cmd and installing the hook through the clink-cmd shell option instead, 
+    as it provides additional functionality such as autocomplete and performs 
+    autorun through a script, isolating the modification from other terminal programs.
+
 Examples:
     uve setup --install ~/.bashrc
     uve setup --reinstall ~/.config/fish/config.fish
@@ -291,6 +306,22 @@ def print_installation_plan(
     print(shell_message)
     print()
 
+    limited_shell = shell_name in {"cmd", "csh"} or (
+        shell_name is None and shell_family in {"cmd", "cshell"}
+    )
+
+    if limited_shell:
+        limited_shell_name = (
+            shell_name
+            if shell_name is not None
+            else ("csh" if shell_family == "cshell" else "cmd")
+        )
+        print(
+            f"WARNING: integration with {limited_shell_name} is limited "
+            "to the shell hook and does not provide autocomplete."
+        )
+        print()
+
     print_installation_action(
         plan=plan,
         shell_family=shell_family,
@@ -306,13 +337,17 @@ def print_installation_action(
 ):
     if plan.action == "create":
         print("Create file:")
+        print()
         print(f"  + {plan.profile_path}")
+        print()
         print("  The hook autorun script will be created.")
         return
 
     if plan.action == "overwrite":
         print("Overwrite file:")
+        print()
         print(f"  ~ {plan.profile_path}")
+        print()
         print("  The hook autorun script will be regenerated.")
         return
 
@@ -321,12 +356,15 @@ def print_installation_action(
             raise RuntimeError(
                 "An installation plan for a script must have a profile path."
             )
+
         print("Edit file:")
+        print()
         print(f"  ~ {plan.profile_path}")
-        print(
-            f"  The command:\n{render_shell_hook_call(shell_family)}\n"
-            f"will be inserted at the end of {plan.profile_path.name}."
-        )
+        print()
+        print("  The following command will be inserted at the end of")
+        print(f"  {plan.profile_path.name}:")
+        print()
+        print(f"    {render_shell_hook_call(shell_family)}")
         return
 
     if plan.action == "replace":
@@ -334,51 +372,74 @@ def print_installation_action(
             raise RuntimeError(
                 "An installation plan for a script must have a profile path."
             )
+
         print("Edit file:")
+        print()
         print(f"  ~ {plan.profile_path}")
-        print("  Remove the existing hook launcher block.")
-        print(
-            f"  The command:\n{render_shell_hook_call(shell_family)}\n"
-            f"will be inserted at the end of {plan.profile_path.name}."
-        )
+        print()
+        print("  The existing hook launcher block will be removed.")
+        print()
+        print("  The following command will then be inserted at the end of")
+        print(f"  {plan.profile_path.name}:")
+        print()
+        print(f"    {render_shell_hook_call(shell_family)}")
         return
 
     if plan.action == "insert_reg":
         print("Edit Windows registry:")
+        print()
+        print("  Registry key:")
+        print()
+        print(f"    {AUTORUN_KEY!r}")
+        print()
+        print(f"  Registry value: {AUTORUN_VALUE!r}")
+        print()
+        print("  The following command will be added to the Windows AutoRun")
+        print("  configuration:")
+        print()
+        print(f"    {render_shell_hook_call(shell_family)}")
+        print()
         print(
-            f"  The command:\n{render_shell_hook_call(shell_family)}\n"
-            "will be added to the Windows AutoRun configuration."
+            "  WARNING: modifying the Windows CMD AutoRun configuration can cause bugs"
         )
-        print(
-            f"  WARNING: creating the value\n{AUTORUN_KEY!r}\nin the "
-            f"registry key {AUTORUN_VALUE!r} can cause bugs in "
-            "alternative shells such as Cmder."
-        )
+        print("  in alternative shells and terminal programs such as Cmder.")
         print("  The registry backup can be used to revert this change.")
         return
 
     if plan.action == "replace_reg":
         print("Edit Windows registry:")
-        print("  Remove the existing hook launcher block.")
+        print()
+        print("  Registry key:")
+        print()
+        print(f"    {AUTORUN_KEY!r}")
+        print()
+        print("  Registry value:")
+        print()
+        print(f"    {AUTORUN_VALUE!r}")
+        print()
+        print("  The existing hook launcher block will be removed.")
+        print()
+        print("  The following command will then be added to the Windows")
+        print("  AutoRun configuration:")
+        print()
+        print(f"    {render_shell_hook_call(shell_family)}")
+        print()
         print(
-            f'  The command generated by render_shell_hook_call("{shell_family}") '
-            "will be added to the Windows AutoRun configuration."
+            "  WARNING: modifying the Windows CMD AutoRun configuration can cause bugs"
         )
-        print(
-            f"  WARNING: creating the value {AUTORUN_KEY!r} in the "
-            f"registry key {AUTORUN_VALUE!r} can cause bugs in "
-            "alternative shells such as Cmder."
-        )
+        print("  in alternative shells and terminal programs such as Cmder.")
         print("  The registry backup can be used to revert this change.")
         return
 
     if plan.action == "skip":
         if plan.win_reg_edit:
             print("No changes required:")
-            print("  = Windows registry CMD AutoRun")
+            print()
+            print("  Windows registry CMD AutoRun")
         else:
             print("No changes required:")
-            print(f"  = {plan.profile_path}")
+            print()
+            print(f"  {plan.profile_path}")
         return
 
     raise RuntimeError(f"Unknown installation action: {plan.action}")
