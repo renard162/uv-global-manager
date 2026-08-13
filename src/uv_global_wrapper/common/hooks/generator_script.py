@@ -24,6 +24,7 @@ SCRIPT_EXTENSIONS = {
     "cmd": "bat",
     "nushell": "nu",
     "xonsh": "xsh",
+    "clink-cmd": "lua",
 }
 
 

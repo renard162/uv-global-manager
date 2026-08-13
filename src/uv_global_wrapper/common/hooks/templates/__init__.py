@@ -1,3 +1,4 @@
+from .clink_cmd import template_clink_cmd_hook_script
 from .cmd import template_cmd_hook_script
 from .cshell import template_cshell_hook_script
 from .fish import template_fish_hook_script
@@ -7,6 +8,7 @@ from .powershell import template_powershell_hook_script
 from .xonsh import template_xonsh_hook_script
 
 __all__ = [
+    "template_clink_cmd_hook_script",
     "template_cmd_hook_script",
     "template_cshell_hook_script",
     "template_fish_hook_script",

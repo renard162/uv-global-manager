@@ -6,6 +6,7 @@ from ..paths import (
     path_as_windows,
 )
 from .templates import (
+    template_clink_cmd_hook_script,
     template_cmd_hook_script,
     template_cshell_hook_script,
     template_fish_hook_script,
@@ -23,6 +24,7 @@ HOOK_SCRIPT_NAMES = {
     "cmd": "uve-cmd.bat",
     "nushell": "uve-nushell.nu",
     "xonsh": "uve-xonsh.xsh",
+    "clink-cmd": "uve-clink-cmd.lua",
 }
 
 HOOK_MARKER = "uv-global-wrapper-hook-call"
@@ -35,6 +37,7 @@ COMMENT_MARKERS = {
     "cmd": "REM",
     "nushell": "#",
     "xonsh": "#",
+    "clink-cmd": "--",
 }
 
 
@@ -62,6 +65,7 @@ def render_shell_hook_call(shell_family: str) -> str:
         "cmd": f'doskey uve=call "%USERPROFILE%\\{windows_location}\\{hook_script}" $*',
         "nushell": f'source ($nu.home-dir | path join "{posix_location}/{hook_script}")',
         "xonsh": f'source "~/{posix_location}/{hook_script}"',
+        "clink-cmd": f'dofile(clink.get_env("USERPROFILE") .. "/{posix_location}/{hook_script}")',
     }
 
     hook_call = hook_calls_dict.get(shell_family, None)
@@ -81,6 +85,7 @@ def render_shell_hook_script(shell_family: str) -> str:
         "cmd": template_cmd_hook_script,
         "nushell": template_nushell_hook_script,
         "xonsh": template_xonsh_hook_script,
+        "clink-cmd": template_clink_cmd_hook_script,
     }
 
     hook_script_function = hook_scripts_dict.get(shell_family, None)

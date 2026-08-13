@@ -14,6 +14,7 @@ from ..common.hooks.generator_reg import (
     remove_hook_launcher_from_autorun_reg,
 )
 from ..common.hooks.generator_script import (
+    SCRIPT_EXTENSIONS,
     backup_file,
     find_hook_launcher_code_block,
     generate_hook_launcher_script,
@@ -87,7 +88,7 @@ Examples:
 
     install_group.add_argument(
         "--hook-script",
-        choices=("posix", "cshell", "fish", "powershell", "cmd", "nushell", "xonsh"),
+        choices=SCRIPT_EXTENSIONS.keys(),
         help="Generate only the hook script for the specified shell.",
     )
 
@@ -106,7 +107,7 @@ Examples:
     parser.add_argument(
         "-s",
         "--shell",
-        choices=("posix", "cshell", "fish", "powershell", "cmd", "nushell", "xonsh"),
+        choices=SCRIPT_EXTENSIONS.keys(),
         help=(
             "Select the shell explicitly instead of detecting it automatically "
             "when installing or reinstalling shell hooks."
