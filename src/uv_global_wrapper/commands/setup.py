@@ -190,8 +190,8 @@ def install(
         shell_family=shell_family,
     )
 
-    if not confirm_installation():
-        print("Installation aborted.")
+    if not confirm_operation():
+        print("\nInstallation aborted.")
         return
 
     create_folder_tree()
@@ -397,8 +397,8 @@ def print_installation_backup(plan: InstallationPlan):
         print(f"  A backup of {plan.profile_path} will be created before editing.")
 
 
-def confirm_installation() -> bool:
-    answer = input("Continue with the installation? [y/N] ").strip().lower()
+def confirm_operation() -> bool:
+    answer = input("Continue? [y/N] ").strip().lower()
     return answer in {"y", "yes"}
 
 
@@ -510,7 +510,7 @@ def install_hook_script_only(shell_family: str) -> None:
     print("\n\nThe hook script was generated successfully.")
     print("Run the following command or add it to your shell profile:")
     print(f"\n{render_shell_hook_call(shell_family)}\n")
-    input("Press any key to exit.")
+    input("Press Enter to exit.")
 
 
 def fail_safe_repository_update() -> None:
@@ -521,14 +521,12 @@ def fail_safe_repository_update() -> None:
 
     print(
         "WARNING: all packages in the local package repository "
-        "will be updated to their latest available versions."
+        "will be updated to their latest available versions.\n"
     )
-    print(f"Repository: {original_repository_folder}")
+    print(f"Repository: {original_repository_folder}\n")
 
-    answer = input("Continue? [y/N] ").strip().lower()
-
-    if answer not in {"y", "yes"}:
-        print("Repository update aborted.")
+    if not confirm_operation():
+        print("\nRepository update aborted.")
         return
 
     if not original_repository_folder.is_dir():
@@ -578,14 +576,12 @@ def clear_repository() -> None:
 
     print(
         "WARNING: all files and directories in the local package "
-        "repository will be deleted."
+        "repository will be deleted.\n"
     )
-    print(f"Repository: {repository}")
+    print(f"Repository: {repository}\n")
 
-    answer = input("Continue? [y/N] ").strip().lower()
-
-    if answer not in {"y", "yes"}:
-        print("Repository cleanup aborted.")
+    if not confirm_operation():
+        print("\nRepository cleanup aborted.")
         return
 
     if repository.exists():
@@ -593,7 +589,7 @@ def clear_repository() -> None:
 
     create_path_tree(repository)
 
-    print("Local package repository cleared successfully.")
+    print("\nLocal package repository cleared successfully.")
 
 
 @dataclass
