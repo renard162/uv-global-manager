@@ -1,11 +1,18 @@
 from textwrap import dedent
 
-from ...paths import path_as_posix, venv_script_folder_name, venvs_root_path
+from ....commands import COMMANDS_DICT
+from ...paths import (
+    path_as_posix,
+    venv_script_folder_name,
+    venvs_root_path,
+)
 
 
 def template_nushell_hook_script() -> str:
+    commands = repr(list(COMMANDS_DICT.values()))
     root_folder = path_as_posix(venvs_root_path(abs_path=False))
     script_folder = venv_script_folder_name()
+
     return dedent(f"""
         def --env deactivate [] {{
             if "UVE_OLD_PATH" not-in $env {{
@@ -60,6 +67,36 @@ def template_nushell_hook_script() -> str:
             }}
         }}
 
+        def uve-completer [spans: list<string>] {{
+            if ($spans | length) == 2 {{
+                return {commands}
+            }}
+
+            if ($spans | length) < 3 {{
+                return []
+            }}
+
+            let subcommand = $spans.1
+
+            if $subcommand not-in ["activate", "delete"] {{
+                return []
+            }}
+
+            let venvs_root = ($nu.home-dir | path join "{root_folder}")
+
+            if not ($venvs_root | path exists) {{
+                return []
+            }}
+
+            return (
+                ls $venvs_root
+                | where type == dir
+                | get name
+                | path basename
+            )
+        }}
+
+        @complete uve-completer
         def --env --wrapped uve [...args] {{
             if (
                 ($args | length) >= 2 and
