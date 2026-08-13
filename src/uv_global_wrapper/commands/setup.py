@@ -474,23 +474,29 @@ def fail_safe_repository_update() -> None:
         original_repository_folder.parent / f"{original_repository_folder.name}_bck"
     )
 
+    print(
+        "WARNING: all packages in the local package repository "
+        "will be updated to their latest available versions."
+    )
+    print(f"Repository: {original_repository_folder}")
+
+    answer = input("Continue? [y/N] ").strip().lower()
+
+    if answer not in {"y", "yes"}:
+        print("Repository update aborted.")
+        return
+
     if not original_repository_folder.is_dir():
         create_path_tree(original_repository_folder)
 
     if backup_repository_folder.exists():
         shutil.rmtree(backup_repository_folder)
 
-    print("Updating local package repository.")
-    print(f"Repository: {original_repository_folder}")
-    print(f"Backup:     {backup_repository_folder}")
-
     original_repository_folder.rename(backup_repository_folder)
     create_path_tree(original_repository_folder)
 
     try:
         for package in EXTERNAL_PACKAGES.values():
-            print(f"\nDownloading package: {package}")
-
             result = download_package(
                 package=package,
                 raise_on_fail=False,
