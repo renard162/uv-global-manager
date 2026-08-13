@@ -1,8 +1,18 @@
 from textwrap import dedent
 
+from ....commands import COMMANDS_DICT
+from ...paths import (
+    path_as_posix,
+    venvs_root_path,
+)
+
 
 def template_fish_hook_script() -> str:
-    return dedent("""
+    commands = " ".join(COMMANDS_DICT.values())
+    venvs_path = path_as_posix(venvs_root_path(abs_path=False))
+
+    return dedent(
+        f"""
         function uve
             if test (count $argv) -ge 2
                 if test "$argv[1]" = "activate"
@@ -18,4 +28,15 @@ def template_fish_hook_script() -> str:
 
             command uve $argv
         end
-    """).strip()
+
+        complete -c uve -f -n "__fish_use_subcommand" -a "{commands}"
+
+        complete -c uve -f -n "__fish_seen_subcommand_from activate delete" -a '
+            for environment in "$HOME/{venvs_path}"/*
+                if test -d "$environment"
+                    basename "$environment"
+                end
+            end
+        '
+        """
+    ).strip()
