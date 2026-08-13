@@ -15,6 +15,7 @@ from .common.utils import which_path_only as which
 
 def main():
     try:
+        integrity_check()
         parser = argparse.ArgumentParser(
             prog="uve",
             description=(
@@ -34,15 +35,47 @@ def main():
         makeproject.register(sub)
         setup.register(sub)
 
+        help_parser = sub.add_parser(
+            "help",
+            help="Display help for a command.",
+            description="Display help for uve or for a specific command.",
+            allow_abbrev=False,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog="""\
+Examples:
+    uve help
+    uve help activate
+    uve help list
+    uve help create
+    uve help delete
+    uve help make-project
+    uve help setup
+    uve help help
+""",
+        )
+
+        help_parser.add_argument(
+            "help_command",
+            nargs="?",
+            choices=tuple(sub.choices),
+            metavar="COMMAND",
+            help="Command for which to display help.",
+        )
+
+        help_parser.set_defaults(
+            func=help_run,
+            parser=parser,
+            subparsers=sub,
+        )
+
         args = parser.parse_args()
 
         if args.command is None:
             parser.print_help()
-
-        integrity_check()
-
-        if args.command is None:
             return 0
+
+        if args.command == "help":
+            return args.func(args)
 
         return args.func(args)
 
@@ -53,6 +86,15 @@ def main():
     except Exception as exc:  # noqa: BLE001
         print(f"Error: {exc}", file=sys.stderr)
         raise SystemExit(1)
+
+
+def help_run(args):
+    if args.help_command is None:
+        args.parser.print_help()
+        return 0
+
+    args.subparsers.choices[args.help_command].print_help()
+    return 0
 
 
 def integrity_check():
