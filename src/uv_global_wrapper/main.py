@@ -2,15 +2,22 @@ import argparse
 import os
 import sys
 
-from .commands import (
-    activate,
-    create,
-    delete,
-    list,
-    makeproject,
-    setup,
-)
+from .commands import activate as activate_command
+from .commands import create as create_command
+from .commands import delete as delete_command
+from .commands import list as list_command
+from .commands import makeproject as makeproject_command
+from .commands import setup as setup_command
 from .common.utils import which_path_only as which
+
+COMMANDS = {
+    "activate": activate_command,
+    "list": list_command,
+    "create": create_command,
+    "delete": delete_command,
+    "makeproject": makeproject_command,
+    "setup": setup_command,
+}
 
 
 def main():
@@ -28,12 +35,8 @@ def main():
 
         sub = parser.add_subparsers(dest="command")
 
-        activate.register(sub)
-        list.register(sub)
-        create.register(sub)
-        delete.register(sub)
-        makeproject.register(sub)
-        setup.register(sub)
+        for command in COMMANDS.values():
+            command.register(sub)
 
         help_parser = sub.add_parser(
             "help",
@@ -95,6 +98,10 @@ def help_run(args):
 
     args.subparsers.choices[args.help_command].print_help()
     return 0
+
+
+def get_commands_list() -> list[str]:
+    return list(COMMANDS.keys())
 
 
 def integrity_check():
