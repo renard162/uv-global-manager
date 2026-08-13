@@ -133,7 +133,7 @@ def install(
         raise ValueError("A profile must be specified with --install or --reinstall.")
 
     profile_path = (
-        Path(profile).expanduser().resolve() if isinstance(profile, Path) else None
+        Path(profile).expanduser().resolve() if isinstance(profile, str) else None
     )
 
     plan = build_installation_plan(
