@@ -44,6 +44,7 @@ def register(subparsers):
         default=False,
         metavar="PROFILE",
     )
+
     install_group.add_argument(
         "--reinstall",
         nargs="?",
@@ -51,15 +52,34 @@ def register(subparsers):
         metavar="PROFILE",
     )
 
+    install_group.add_argument(
+        "--hook-script",
+        nargs="?",
+        default=False,
+        metavar="SHELL",
+        help="Only generate the hook script for the specified shell family.",
+    )
+
     parser.set_defaults(func=setup_run, parser=parser)
 
 
 def setup_run(args: argparse.Namespace):
-    if (args.install is False) and (args.reinstall is False):
+    if (
+        (args.install is False)
+        and (args.reinstall is False)
+        and (args.hook_script is False)
+    ):
         args.parser.print_help()
         return
 
-    shell_name, shell_family = get_parent_shell()
+    if args.hook_script is not False:
+        shell_name, shell_family = None, args.hook_script
+    else:
+        shell_name, shell_family = get_parent_shell()
+
+    if args.hook_script is not False:
+        install_hook_script_only(shell_family=shell_family)
+        return
 
     if args.install is not False:
         install(
@@ -79,8 +99,8 @@ def setup_run(args: argparse.Namespace):
 
 
 def install(
-    profile: str | None,
-    shell_name: str,
+    profile: str | bool,
+    shell_name: str | None,
     shell_family: str,
     reinstall: bool,
 ) -> None:
@@ -187,7 +207,7 @@ def build_installation_plan(
 
 def print_installation_plan(
     plan: InstallationPlan,
-    shell_name: str,
+    shell_name: str | None,
     shell_family: str,
 ):
     shell_message = (
@@ -409,6 +429,16 @@ def create_folder_tree() -> None:
 
     for folder in folder_tree:
         create_path_tree(folder)
+
+
+def install_hook_script_only(shell_family: str) -> None:
+    create_folder_tree()
+    generate_hook_script(shell_family)
+
+    print("\n\nThe hook script was generated successfully.")
+    print("Run the following command or add it to your shell profile:")
+    print(f"\n{render_shell_hook_call(shell_family)}\n")
+    input("Press any key to exit.")
 
 
 @dataclass

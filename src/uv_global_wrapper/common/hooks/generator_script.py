@@ -1,6 +1,8 @@
 import shutil
 from pathlib import Path
 
+from shellingham import ShellDetectionFailure
+
 from ..paths import backup_folder_path, hook_script_path
 from ..utils import create_path_tree
 from .renders import (
@@ -28,7 +30,10 @@ SCRIPT_EXTENSIONS = {
 def generate_hook_script(shell_family: str) -> None:
     hook_script_folder = hook_script_path()
     create_path_tree(hook_script_folder)
-    script_path = hook_script_folder / HOOK_SCRIPT_NAMES[shell_family]
+    script_name = HOOK_SCRIPT_NAMES.get(shell_family, None)
+    if script_name is None:
+        raise ShellDetectionFailure(f"Unsupported shell family: {shell_family}")
+    script_path = hook_script_folder / script_name
     generate_script(
         script_path=script_path,
         content=render_shell_hook_script(shell_family),
