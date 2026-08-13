@@ -8,9 +8,6 @@ from ...paths import (
 
 
 def template_cshell_hook_script() -> str:
-    commands = " ".join(COMMANDS_DICT.values())
-    venvs_path = path_as_posix(venvs_root_path(abs_path=False))
-
     return dedent(r"""
-        alias uvg 'if ("\!:1" == "activate" && "\!:2" != "" && "\!:2" != "-h" && "\!:2" != "--help") then; eval `\uvg activate "\!:2" --hook cshell`; else; \uvg \!*; endif'
+        alias uve 'if ("\!:1*" =~ "activate *" && "\!:1*" != "activate -h" && "\!:1*" != "activate --help") eval `\uve activate "\!:2*" --hook cshell`; if ("\!:1*" !~ "activate *" || "\!:1*" == "activate -h" || "\!:1*" == "activate --help") \uve \!*'
     """).strip()
