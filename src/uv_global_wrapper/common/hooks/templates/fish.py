@@ -31,12 +31,12 @@ def template_fish_hook_script() -> str:
 
         complete -c uve -f -n "__fish_use_subcommand" -a "{commands}"
 
-        complete -c uve -f -n "__fish_seen_subcommand_from activate delete" -a '
-            for environment in "$HOME/{venvs_path}"/*
-                if test -d "$environment"
-                    basename "$environment"
-                end
-            end
-        '
+        complete -c uve -f \
+            -n "__fish_seen_subcommand_from activate delete" \
+            -a '(for environment in "$HOME/{venvs_path}"/*
+                    if test -d "$environment"
+                        basename "$environment"
+                    end
+                end)'
         """
     ).strip()
