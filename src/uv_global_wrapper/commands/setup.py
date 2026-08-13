@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -26,6 +27,10 @@ from ..common.paths import (
     backup_folder_path,
     hook_script_path,
     repository_path,
+)
+from ..common.repository import (
+    EXTERNAL_PACKAGES,
+    download_package,
 )
 from ..common.utils import (
     create_path_tree,
@@ -60,6 +65,16 @@ def register(subparsers):
         help="Only generate the hook script for the specified shell family.",
     )
 
+    install_group.add_argument(
+        "--update-repo",
+        action="store_true",
+    )
+
+    install_group.add_argument(
+        "--clear-repo",
+        action="store_true",
+    )
+
     parser.set_defaults(func=setup_run, parser=parser)
 
 
@@ -68,8 +83,18 @@ def setup_run(args: argparse.Namespace):
         (args.install is False)
         and (args.reinstall is False)
         and (args.hook_script is False)
+        and (not args.update_repo)
+        and (not args.clear_repo)
     ):
         args.parser.print_help()
+        return
+
+    if args.update_repo:
+        fail_safe_repository_update()
+        return
+
+    if args.clear_repo:
+        clear_repository()
         return
 
     if args.hook_script is not False:
@@ -441,6 +466,83 @@ def install_hook_script_only(shell_family: str) -> None:
     print("Run the following command or add it to your shell profile:")
     print(f"\n{render_shell_hook_call(shell_family)}\n")
     input("Press any key to exit.")
+
+
+def fail_safe_repository_update() -> None:
+    original_repository_folder = repository_path()
+    backup_repository_folder = (
+        original_repository_folder.parent / f"{original_repository_folder.name}_bck"
+    )
+
+    if not original_repository_folder.is_dir():
+        create_path_tree(original_repository_folder)
+
+    if backup_repository_folder.exists():
+        shutil.rmtree(backup_repository_folder)
+
+    print("Updating local package repository.")
+    print(f"Repository: {original_repository_folder}")
+    print(f"Backup:     {backup_repository_folder}")
+
+    original_repository_folder.rename(backup_repository_folder)
+    create_path_tree(original_repository_folder)
+
+    try:
+        for package in EXTERNAL_PACKAGES.values():
+            print(f"\nDownloading package: {package}")
+
+            result = download_package(
+                package=package,
+                raise_on_fail=False,
+                print_stdout=True,
+                print_stderr=True,
+            )
+
+            if result != 0:
+                print("\nFailed to update local package repository.")
+                print("Removing incomplete repository.")
+                shutil.rmtree(original_repository_folder)
+
+                print("Restoring previous repository.")
+                backup_repository_folder.rename(original_repository_folder)
+                return
+
+        print("\nLocal package repository updated successfully.")
+        print(f"Removing backup: {backup_repository_folder}")
+        shutil.rmtree(backup_repository_folder)
+        return
+
+    except Exception:
+        if original_repository_folder.exists():
+            shutil.rmtree(original_repository_folder)
+
+        if backup_repository_folder.exists():
+            backup_repository_folder.rename(original_repository_folder)
+
+        raise
+
+
+def clear_repository() -> None:
+    repository = repository_path()
+
+    print(
+        "WARNING: all files and directories in the local package "
+        "repository will be deleted."
+    )
+    print(f"Repository: {repository}")
+
+    answer = input("Continue? [y/N] ").strip().lower()
+
+    if answer not in {"y", "yes"}:
+        print("Repository cleanup aborted.")
+        return
+
+    if repository.exists():
+        shutil.rmtree(repository)
+
+    create_path_tree(repository)
+
+    print("Local package repository cleared successfully.")
 
 
 @dataclass

@@ -4,6 +4,7 @@ from .paths import repository_path
 from .utils import create_path_tree
 
 BASE_PYTHON_VERSION = "3.13"
+
 EXTERNAL_PACKAGES = {
     "pipdeptree": "pipdeptree==4.*",
 }
