@@ -32,14 +32,19 @@ def template_clink_cmd_hook_script() -> str:
             end
 
             local cwd = os.getcwd()
-
             os.chdir(root)
-
             local matches = clink.dirmatches(word)
-
             os.chdir(cwd)
+            local result = {{}}
 
-            return matches
+            for _, match in ipairs(matches) do
+                table.insert(result, {{
+                    match = match.match:gsub("[\\\\/]+$", ""),
+                    type = "word",
+                }})
+            end
+
+            return result
         end
 
 
@@ -62,7 +67,6 @@ def template_clink_cmd_hook_script() -> str:
 
             local output = pipe:read("*a")
             pipe:close()
-
             output = output:gsub("^%s+", ""):gsub("%s+$", "")
 
             if output == "" then
@@ -76,7 +80,6 @@ def template_clink_cmd_hook_script() -> str:
         local function is_uve_command(line_state)
             local command_index = line_state:getcommandwordindex()
             local command = line_state:getword(command_index)
-
             return command ~= nil and command:lower() == "uve"
         end
 
