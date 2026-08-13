@@ -60,7 +60,7 @@ def template_nushell_hook_script() -> str:
             }}
         }}
 
-        def --env uve [...args] {{
+        def --env --wrapped uve [...args] {{
             if (
                 ($args | length) >= 2 and
                 $args.0 == "activate" and
