@@ -42,7 +42,18 @@ def register(subparsers):
     parser = subparsers.add_parser(
         "setup",
         allow_abbrev=False,
-        description="Install shell hooks, generate hook scripts, or manage the local package repository.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=("Install shell hooks or manage the local package repository."),
+        epilog="""\
+                Examples:
+                    uve setup --install
+                    uve setup --install ~/.bashrc
+                    uve setup --reinstall ~/.bashrc
+                    uve setup --hook-script fish
+                    uve setup --shell fish --install ~/.config/fish/config.fish
+                    uve setup --update-repo
+                    uve setup --clear-repo
+                """,
     )
 
     install_group = parser.add_mutually_exclusive_group()
@@ -53,8 +64,9 @@ def register(subparsers):
         default=False,
         metavar="PROFILE",
         help=(
-            "Install shell integration. PROFILE may be a shell profile "
-            "file or directory. When omitted, CMD uses Windows AutoRun."
+            "Install shell hooks into PROFILE.\n"
+            "\n"
+            "If PROFILE is omitted, CMD uses Windows AutoRun."
         ),
     )
 
@@ -64,8 +76,9 @@ def register(subparsers):
         default=False,
         metavar="PROFILE",
         help=(
-            "Reinstall shell integration. PROFILE may be a shell profile "
-            "file or directory. Existing hook integration is replaced."
+            "Reinstall shell hooks into PROFILE.\n"
+            "\n"
+            "Existing hook integration is replaced."
         ),
     )
 
@@ -74,16 +87,16 @@ def register(subparsers):
         metavar="SHELL",
         choices=("posix", "cshell", "fish", "powershell", "cmd", "nushell", "xonsh"),
         help=(
-            "Generate only the hook script for SHELL, without installing "
-            "it into a shell profile. Valid choices: "
-            "posix, cshell, fish, powershell, cmd, nushell, xonsh."
+            "Generate only the hook script for SHELL.\n"
+            "\n"
+            "Valid choices: posix, cshell, fish, powershell, cmd, nushell, xonsh."
         ),
     )
 
     install_group.add_argument(
         "--update-repo",
         action="store_true",
-        help="Update the local package repository to the latest package versions.",
+        help=("Update the local package repository to the latest package versions."),
     )
 
     install_group.add_argument(
@@ -98,15 +111,13 @@ def register(subparsers):
         metavar="SHELL",
         choices=("posix", "cshell", "fish", "powershell", "cmd", "nushell", "xonsh"),
         help=(
-            "Select the shell explicitly instead of detecting it automatically. "
+            "Select the shell explicitly instead of detecting it automatically.\n"
+            "\n"
             "Valid choices: posix, cshell, fish, powershell, cmd, nushell, xonsh."
         ),
     )
 
-    parser.set_defaults(
-        func=setup_run,
-        parser=parser,
-    )
+    parser.set_defaults(func=setup_run, parser=parser)
 
 
 def setup_run(args: argparse.Namespace):
