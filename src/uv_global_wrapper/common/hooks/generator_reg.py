@@ -1,5 +1,5 @@
+import os
 import re
-import winreg
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -9,6 +9,45 @@ from .renders import (
     HOOK_SCRIPT_NAMES,
     render_shell_hook_call,
 )
+
+if os.name == "nt":
+    import winreg
+else:
+    from typing import Any, Self
+
+    class _DummyKey:
+        def __enter__(self) -> Self:
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            return None
+
+    class winreg:
+        HKEY_CURRENT_USER = None
+        KEY_SET_VALUE = 0
+        REG_SZ = None
+        KEY_READ = 0
+
+        @staticmethod
+        def OpenKey(*args: Any, **kwargs: Any) -> _DummyKey:
+            return _DummyKey()
+
+        @staticmethod
+        def CreateKeyEx(*args: Any, **kwargs: Any) -> _DummyKey:
+            return _DummyKey()
+
+        @staticmethod
+        def SetValueEx(*args: Any, **kwargs: Any) -> None:
+            return None
+
+        @staticmethod
+        def DeleteValue(*args: Any, **kwargs: Any) -> None:
+            return None
+
+        @staticmethod
+        def QueryValueEx(*args: Any, **kwargs: Any) -> tuple[Any, Any]:
+            return None, None
+
 
 AUTORUN_KEY = r"Software\Microsoft\Command Processor"
 AUTORUN_VALUE = "AutoRun"
@@ -46,9 +85,7 @@ def add_hook_launcher_to_autorun_reg() -> None:
         autorun = f"{autorun} & {hook_call}"
 
     with winreg.CreateKeyEx(
-        winreg.HKEY_CURRENT_USER,
-        AUTORUN_KEY,
-        access=winreg.KEY_SET_VALUE,
+        winreg.HKEY_CURRENT_USER, AUTORUN_KEY, access=winreg.KEY_SET_VALUE
     ) as key:
         winreg.SetValueEx(key, AUTORUN_VALUE, 0, winreg.REG_SZ, autorun)
 
@@ -88,14 +125,9 @@ def backup_autorun_win_reg() -> tuple[str, bool]:
     try:
         try:
             with winreg.OpenKey(
-                winreg.HKEY_CURRENT_USER,
-                AUTORUN_KEY,
-                access=winreg.KEY_READ,
+                winreg.HKEY_CURRENT_USER, AUTORUN_KEY, access=winreg.KEY_READ
             ) as key:
-                value, value_type = winreg.QueryValueEx(
-                    key,
-                    "AutoRun",
-                )
+                value, value_type = winreg.QueryValueEx(key, "AutoRun")
         except FileNotFoundError:
             value = None
             value_type = None

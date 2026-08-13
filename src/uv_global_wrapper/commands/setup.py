@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 from dataclasses import dataclass
 from pathlib import Path
@@ -174,7 +175,7 @@ def install(
     shell_family: str,
     reinstall: bool,
 ) -> None:
-    if (profile is None) and (shell_family != "cmd"):
+    if (profile is None) and ((shell_family != "cmd") or (os.name != "nt")):
         raise ValueError("A profile must be specified with --install or --reinstall.")
 
     profile_path = (
@@ -216,7 +217,7 @@ def build_installation_plan(
     win_reg_edit: bool,
 ) -> InstallationPlan:
     if win_reg_edit:
-        if shell_family != "cmd" or profile_path is not None:
+        if (shell_family != "cmd") or (profile_path is not None) or (os.name != "nt"):
             raise ValueError("Invalid Windows registry installation state.")
 
         block = find_hook_launcher_win_reg()
@@ -469,6 +470,9 @@ def execute_installation_plan(plan: InstallationPlan, shell_family: str):
 
 
 def execute_windows_registry_installation(plan: InstallationPlan):
+    if os.name != "nt":
+        raise RuntimeError("This option is only supported on Windows.")
+
     if plan.backup:
         backup_message, backup_error = backup_autorun_win_reg()
 
