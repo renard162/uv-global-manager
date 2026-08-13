@@ -22,15 +22,25 @@ def register(subparsers):
     parser = subparsers.add_parser(
         "create",
         help="Create a global virtual environment.",
-        description="Creates a global virtual environment.",
-        formatter_class=argparse.RawTextHelpFormatter,
+        description=(
+            "Create a global virtual environment using the specified "
+            "Python interpreter and optionally install its dependencies."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
         allow_abbrev=False,
+        epilog="""\
+Examples:
+    uve create myenv
+    uve create myenv --python 3.12
+    uve create myenv --requirements requirements.txt
+    uve create myenv --python 3.12 --requirements requirements.txt
+""",
     )
 
     parser.add_argument(
         "name",
         nargs="?",
-        help="Name of the virtual environment to create.",
+        help="Name of the global virtual environment to create.",
     )
 
     parser.add_argument(
@@ -38,8 +48,7 @@ def register(subparsers):
         "--python",
         metavar="PYTHON",
         help=(
-            "Python interpreter to use for the virtual environment.\n"
-            "UV will not look for Python interpreters in virtual environments.\n"
+            "Python interpreter to use for the global virtual environment. "
             'See "uv help python" for supported request formats and Python '
             "discovery details."
         ),
@@ -49,13 +58,12 @@ def register(subparsers):
         "-r",
         "--requirements",
         metavar="FILE",
-        help="Install dependencies from a requirements file in the new venv.",
+        help=(
+            "Install dependencies from FILE into the new global virtual environment."
+        ),
     )
 
-    parser.set_defaults(
-        func=create_run,
-        parser=parser,
-    )
+    parser.set_defaults(func=create_run, parser=parser)
 
 
 def create_run(args: argparse.Namespace):

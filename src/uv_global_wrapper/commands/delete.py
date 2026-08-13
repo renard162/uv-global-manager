@@ -12,20 +12,25 @@ def register(subparsers: argparse._SubParsersAction):
     parser = subparsers.add_parser(
         "delete",
         help="Remove a global virtual environment.",
-        description="Deletes a global virtual environment.",
+        description=(
+            "Remove a global virtual environment and all files associated with it."
+        ),
         allow_abbrev=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""\
+Examples:
+    uve delete myenv
+    uve delete --help
+""",
     )
 
     parser.add_argument(
         "name",
         nargs="?",
-        help="Name of the virtual environment to delete.",
+        help="Name of the global virtual environment to delete.",
     )
 
-    parser.set_defaults(
-        func=delete_run,
-        parser=parser,
-    )
+    parser.set_defaults(func=delete_run, parser=parser)
 
 
 def delete_run(args: argparse.Namespace):

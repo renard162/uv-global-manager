@@ -20,14 +20,30 @@ def register(subparsers):
     parser = subparsers.add_parser(
         "activate",
         help="Activate a global virtual environment.",
-        description="Activates a global virtual environment.",
+        description=(
+            "Activate a global virtual environment. When the shell hook is "
+            "installed and active, the environment is activated automatically. "
+            "Otherwise, the command required to activate the environment is "
+            "displayed for copying and pasting.\n"
+            "\n"
+            "For automatic activation through the shell hook, this command "
+            'must be invoked as "uve". Using another executable name, such '
+            'as "uve.exe" on Windows, prevents the hook from recognizing '
+            "and capturing the command correctly."
+        ),
         allow_abbrev=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""\
+Examples:
+    uve activate myenv
+    uve activate
+""",
     )
 
     parser.add_argument(
         "name",
         nargs="?",
-        help="Name of the virtual environment to activate.",
+        help="Name of the global virtual environment to activate.",
     )
 
     parser.add_argument(
@@ -35,10 +51,7 @@ def register(subparsers):
         help=argparse.SUPPRESS,
     )
 
-    parser.set_defaults(
-        func=activate_run,
-        parser=parser,
-    )
+    parser.set_defaults(func=activate_run, parser=parser)
 
 
 def activate_run(args: argparse.Namespace):

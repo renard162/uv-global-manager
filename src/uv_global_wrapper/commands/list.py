@@ -12,12 +12,24 @@ from ..common.utils import (
 
 
 def register(subparsers):
-
     parser = subparsers.add_parser(
         "list",
         help="List global virtual environments.",
-        description="Lists global virtual environments.",
+        description=(
+            "List global virtual environments and optionally filter or summarize them."
+        ),
         allow_abbrev=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""\
+Examples:
+    uve list
+    uve list --implementation CPython
+    uve list --python-version ">=3.10"
+    uve list --python-version "~=3.11"
+    uve list --details
+    uve list --stats
+    uve list --implementation CPython --python-version ">=3.10" --details
+""",
     )
 
     parser.add_argument(
@@ -49,10 +61,7 @@ def register(subparsers):
         help="Show statistics grouped by Python implementation and version.",
     )
 
-    parser.set_defaults(
-        func=list_run,
-        parser=parser,
-    )
+    parser.set_defaults(func=list_run, parser=parser)
 
 
 def list_run(args: argparse.Namespace):

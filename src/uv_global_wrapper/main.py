@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 from .commands import (
     activate,
@@ -13,36 +14,45 @@ from .common.utils import which_path_only as which
 
 
 def main():
-    # try:
-    parser = argparse.ArgumentParser(prog="uve")
-    sub = parser.add_subparsers(dest="command")
+    try:
+        parser = argparse.ArgumentParser(
+            prog="uve",
+            description=(
+                "Manage global Python virtual environments using UV, including "
+                "environments created from Python installations managed by "
+                '"uv python", and create UV projects from existing global virtual '
+                "environments as project templates."
+            ),
+        )
 
-    activate.register(sub)
-    list.register(sub)
-    create.register(sub)
-    delete.register(sub)
-    makeproject.register(sub)
-    setup.register(sub)
+        sub = parser.add_subparsers(dest="command")
 
-    args = parser.parse_args()
+        activate.register(sub)
+        list.register(sub)
+        create.register(sub)
+        delete.register(sub)
+        makeproject.register(sub)
+        setup.register(sub)
 
-    if args.command is None:
-        parser.print_help()
+        args = parser.parse_args()
 
-    integrity_check()
+        if args.command is None:
+            parser.print_help()
 
-    if args.command is None:
-        return 0
+        integrity_check()
 
-    return args.func(args)
+        if args.command is None:
+            return 0
 
-    # except KeyboardInterrupt:
-    #     print("\nOperation cancelled.", file=sys.stderr)
-    #     raise SystemExit(130)
+        return args.func(args)
 
-    # except Exception as exc:  # noqa: BLE001
-    #     print(f"Error: {exc}", file=sys.stderr)
-    #     raise SystemExit(1)
+    except KeyboardInterrupt:
+        print("\nOperation cancelled.", file=sys.stderr)
+        raise SystemExit(130)
+
+    except Exception as exc:  # noqa: BLE001
+        print(f"Error: {exc}", file=sys.stderr)
+        raise SystemExit(1)
 
 
 def integrity_check():

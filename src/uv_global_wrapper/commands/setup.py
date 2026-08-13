@@ -41,19 +41,23 @@ from ..common.utils import (
 def register(subparsers):
     parser = subparsers.add_parser(
         "setup",
+        help="Install shell hooks or manage the local package repository.",
         allow_abbrev=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=("Install shell hooks or manage the local package repository."),
+        description=(
+            "Install shell hooks, generate hook scripts, or manage "
+            "the local package repository."
+        ),
         epilog="""\
-                Examples:
-                    uve setup --install
-                    uve setup --install ~/.bashrc
-                    uve setup --reinstall ~/.bashrc
-                    uve setup --hook-script fish
-                    uve setup --shell fish --install ~/.config/fish/config.fish
-                    uve setup --update-repo
-                    uve setup --clear-repo
-                """,
+Examples:
+    uve setup --install
+    uve setup --install ~/.bashrc
+    uve setup --reinstall C:\\Cmder\\config\\profile.d
+    uve setup --hook-script fish
+    uve setup --install ~/.config/fish/config.fish --shell fish
+    uve setup --update-repo
+    uve setup --clear-repo
+""",
     )
 
     install_group = parser.add_mutually_exclusive_group()
@@ -64,9 +68,8 @@ def register(subparsers):
         default=False,
         metavar="PROFILE",
         help=(
-            "Install shell hooks into PROFILE.\n"
-            "\n"
-            "If PROFILE is omitted, CMD uses Windows AutoRun."
+            "Install shell hooks into PROFILE. "
+            "If PROFILE is omitted, install the hook in the Windows CMD AutoRun configuration."
         ),
     )
 
@@ -76,27 +79,21 @@ def register(subparsers):
         default=False,
         metavar="PROFILE",
         help=(
-            "Reinstall shell hooks into PROFILE.\n"
-            "\n"
-            "Existing hook integration is replaced."
+            "Reinstall shell hooks into PROFILE. "
+            "If PROFILE is omitted, reinstall the hook in the Windows CMD AutoRun configuration."
         ),
     )
 
     install_group.add_argument(
         "--hook-script",
-        metavar="SHELL",
         choices=("posix", "cshell", "fish", "powershell", "cmd", "nushell", "xonsh"),
-        help=(
-            "Generate only the hook script for SHELL.\n"
-            "\n"
-            "Valid choices: posix, cshell, fish, powershell, cmd, nushell, xonsh."
-        ),
+        help="Generate only the hook script for the specified shell.",
     )
 
     install_group.add_argument(
         "--update-repo",
         action="store_true",
-        help=("Update the local package repository to the latest package versions."),
+        help="Update the local package repository to the latest package versions.",
     )
 
     install_group.add_argument(
@@ -108,12 +105,10 @@ def register(subparsers):
     parser.add_argument(
         "-s",
         "--shell",
-        metavar="SHELL",
         choices=("posix", "cshell", "fish", "powershell", "cmd", "nushell", "xonsh"),
         help=(
-            "Select the shell explicitly instead of detecting it automatically.\n"
-            "\n"
-            "Valid choices: posix, cshell, fish, powershell, cmd, nushell, xonsh."
+            "Select the shell explicitly instead of detecting it automatically "
+            "when installing or reinstalling shell hooks."
         ),
     )
 

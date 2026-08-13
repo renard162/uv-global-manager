@@ -28,24 +28,44 @@ def register(subparsers):
         "make-project",
         help="Generate a UV project template from the active virtual environment.",
         description=(
-            "Generates a UV project template from the active virtual environment."
+            "Generate a UV project template from the active virtual environment, "
+            "including its project dependencies."
         ),
         allow_abbrev=False,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""\
+Examples:
+    uve make-project
+    uve make-project myproject
+    uve make-project myproject --bare
+    uve make-project myproject --app
+    uve make-project myproject --lib
+    uve make-project myproject --package
+    uve make-project myproject --no-package
+    uve make-project myproject --bounds lower
+    uve make-project myproject --bounds major
+    uve make-project myproject --bounds minor
+    uve make-project myproject --bounds exact
+""",
     )
 
     parser.add_argument(
         "name",
         nargs="?",
-        help=("Project name. The project directory is created using this name."),
+        metavar="NAME",
+        help="Project name. The project directory is created using this name.",
     )
 
     parser.add_argument(
         "--bounds",
         choices=("lower", "major", "minor", "exact"),
         default="exact",
+        metavar="BOUNDS",
         help=(
-            "Specify the version bounds to apply to project dependencies. "
-            "Choices: lower, major, minor, exact. Defaults to exact. Use 'uv help add' for more informations."
+            "Specify the version bounds used for project dependencies. "
+            "Valid choices are lower, major, minor, and exact. "
+            "Defaults to exact. "
+            "See 'uv help add' for more information."
         ),
     )
 
@@ -55,8 +75,10 @@ def register(subparsers):
         "--bare",
         action="store_true",
         help=(
-            "Generate only the project metadata and dependency specification; "
-            "do not create the project virtual environment or install dependencies."
+            "Generate only the project metadata and dependency specification.\n"
+            "\n"
+            "When this option is specified, the project virtual environment "
+            "is not created and project dependencies are not installed."
         ),
     )
 
@@ -89,13 +111,10 @@ def register(subparsers):
         action="store_const",
         const="--no-package",
         dest="project_type",
-        help="Do not generate a package project.",
+        help="Generate a project without a package.",
     )
 
-    parser.set_defaults(
-        func=makeproject_run,
-        parser=parser,
-    )
+    parser.set_defaults(func=makeproject_run, parser=parser)
 
 
 def makeproject_run(args: argparse.Namespace):
