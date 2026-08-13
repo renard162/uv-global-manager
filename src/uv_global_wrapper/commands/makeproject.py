@@ -12,6 +12,7 @@ from ..common.paths import (
     venv_interpreter_path,
 )
 from ..common.repository import (
+    EXTERNAL_PACKAGES,
     check_package_call,
     download_package,
     run_package,
@@ -177,7 +178,7 @@ def ensure_pipdeptree() -> bool:
     print("Updating the local package repository.")
 
     if download_package(
-        "pipdeptree==4.*",
+        EXTERNAL_PACKAGES["pipdeptree"],
         raise_on_fail=False,
         print_stdout=True,
         print_stderr=False,
