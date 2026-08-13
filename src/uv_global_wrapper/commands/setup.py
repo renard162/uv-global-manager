@@ -54,9 +54,9 @@ def register(subparsers):
 Examples:
     uve setup --install
     uve setup --install ~/.bashrc
-    uve setup --reinstall C:\\Cmder\\config\\profile.d
-    uve setup --hook-script fish
-    uve setup --install ~/.config/fish/config.fish --shell fish
+    uve setup --reinstall ~/.config/fish/config.fish
+    uve setup --hook-script nushell
+    uve setup --install C:\\Cmder\\config\\ --shell clink-cmd
     uve setup --update-repo
     uve setup --clear-repo
 """,
@@ -71,7 +71,8 @@ Examples:
         metavar="PROFILE",
         help=(
             "Install shell hooks into PROFILE. "
-            "If PROFILE is omitted, install the hook in the Windows CMD AutoRun configuration."
+            "If PROFILE is omitted and the shell is cmd, install the hook "
+            "in the Windows CMD AutoRun configuration."
         ),
     )
 
@@ -82,7 +83,8 @@ Examples:
         metavar="PROFILE",
         help=(
             "Reinstall shell hooks into PROFILE. "
-            "If PROFILE is omitted, reinstall the hook in the Windows CMD AutoRun configuration."
+            "If PROFILE is omitted and the shell is cmd, reinstall the hook "
+            "in the Windows CMD AutoRun configuration."
         ),
     )
 
@@ -110,7 +112,9 @@ Examples:
         choices=SCRIPT_EXTENSIONS.keys(),
         help=(
             "Select the shell explicitly instead of detecting it automatically "
-            "when installing or reinstalling shell hooks."
+            "when installing or reinstalling shell hooks. "
+            "The clink-cmd addon is not auto-detected because it extends cmd "
+            "through Clink and must always be selected explicitly with this option."
         ),
     )
 
