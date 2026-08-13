@@ -40,6 +40,8 @@ from ..common.utils import (
     get_parent_shell,
 )
 
+WIN_REGISTRY_PROFILE = "win-registry"
+
 
 def register(subparsers):
     parser = subparsers.add_parser(
@@ -51,13 +53,13 @@ def register(subparsers):
             "Install shell hooks, generate hook scripts, or manage "
             "the local package repository."
         ),
-        epilog="""\
+        epilog=f"""\
 Examples:
-    uve setup --install
     uve setup --install ~/.bashrc
     uve setup --reinstall ~/.config/fish/config.fish
     uve setup --hook-script nushell
     uve setup --install C:\\Cmder\\config\\ --shell clink-cmd
+    uve setup --install {WIN_REGISTRY_PROFILE} --shell cmd
     uve setup --update-repo
     uve setup --clear-repo
 """,
@@ -67,24 +69,20 @@ Examples:
 
     install_group.add_argument(
         "--install",
-        nargs="?",
-        default=False,
         metavar="PROFILE",
         help=(
             "Install shell hooks into PROFILE. "
-            "If PROFILE is omitted and the shell is cmd, install the hook "
+            f"Use '{WIN_REGISTRY_PROFILE}' as PROFILE to install the hook "
             "in the Windows CMD AutoRun configuration."
         ),
     )
 
     install_group.add_argument(
         "--reinstall",
-        nargs="?",
-        default=False,
         metavar="PROFILE",
         help=(
             "Reinstall shell hooks into PROFILE. "
-            "If PROFILE is omitted and the shell is cmd, reinstall the hook "
+            f"Use '{WIN_REGISTRY_PROFILE}' as PROFILE to install the hook "
             "in the Windows CMD AutoRun configuration."
         ),
     )
@@ -124,8 +122,8 @@ Examples:
 
 def setup_run(args: argparse.Namespace):
     if (
-        (args.install is False)
-        and (args.reinstall is False)
+        (args.install is None)
+        and (args.reinstall is None)
         and (args.hook_script is None)
         and (not args.update_repo)
         and (not args.clear_repo)
@@ -152,7 +150,7 @@ def setup_run(args: argparse.Namespace):
         install_hook_script_only(shell_family=shell_family)
         return
 
-    if args.install is not False:
+    if args.install is not None:
         install(
             profile=args.install,
             shell_name=shell_name,
@@ -162,7 +160,7 @@ def setup_run(args: argparse.Namespace):
         return
 
     install(
-        profile=args.reinstall,
+        profile=str(args.reinstall),
         shell_name=shell_name,
         shell_family=shell_family,
         reinstall=True,
@@ -170,23 +168,19 @@ def setup_run(args: argparse.Namespace):
 
 
 def install(
-    profile: str | bool,
+    profile: str,
     shell_name: str | None,
     shell_family: str,
     reinstall: bool,
 ) -> None:
-    if (profile is None) and ((shell_family != "cmd") or (os.name != "nt")):
-        raise ValueError("A profile must be specified with --install or --reinstall.")
-
-    profile_path = (
-        Path(profile).expanduser().resolve() if isinstance(profile, str) else None
-    )
+    win_reg_edit = profile == WIN_REGISTRY_PROFILE
+    profile_path = None if win_reg_edit else Path(profile).expanduser().resolve()
 
     plan = build_installation_plan(
         profile_path=profile_path,
         shell_family=shell_family,
         reinstall=reinstall,
-        win_reg_edit=profile is None,
+        win_reg_edit=win_reg_edit,
     )
 
     print_installation_plan(
@@ -218,7 +212,9 @@ def build_installation_plan(
 ) -> InstallationPlan:
     if win_reg_edit:
         if (shell_family != "cmd") or (profile_path is not None) or (os.name != "nt"):
-            raise ValueError("Invalid Windows registry installation state.")
+            raise ValueError(
+                "Windows registry installation is only supported on Windows."
+            )
 
         block = find_hook_launcher_win_reg()
 
@@ -471,7 +467,9 @@ def execute_installation_plan(plan: InstallationPlan, shell_family: str):
 
 def execute_windows_registry_installation(plan: InstallationPlan):
     if os.name != "nt":
-        raise RuntimeError("This option is only supported on Windows.")
+        raise RuntimeError(
+            "Windows registry installation is only supported on Windows."
+        )
 
     if plan.backup:
         backup_message, backup_error = backup_autorun_win_reg()
