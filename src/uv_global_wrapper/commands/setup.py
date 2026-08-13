@@ -106,7 +106,7 @@ Examples:
         "--reinstall",
         metavar="PROFILE",
         help=(
-            "Reinstall shell hooks into PROFILE. "
+            "Reinstall/Update/Recover shell hooks into PROFILE. "
             f"Use '{WIN_REGISTRY_PROFILE}' as PROFILE to install the hook "
             "in the Windows CMD AutoRun configuration."
         ),
