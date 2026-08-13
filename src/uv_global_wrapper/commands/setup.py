@@ -200,6 +200,9 @@ def install(
         shell_family=shell_family,
     )
 
+    print("\nInstallation completed successfully.")
+    print("Reopen the shell for the changes to take effect.")
+
 
 def build_installation_plan(
     profile_path: Path | None,
