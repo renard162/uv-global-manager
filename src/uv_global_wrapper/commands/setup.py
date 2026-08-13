@@ -107,7 +107,9 @@ def install(
     if (profile is None) and (shell_family != "cmd"):
         raise ValueError("A profile must be specified with --install or --reinstall.")
 
-    profile_path = None if profile is None else Path(profile).expanduser().resolve()
+    profile_path = (
+        Path(profile).expanduser().resolve() if isinstance(profile, Path) else None
+    )
 
     plan = build_installation_plan(
         profile_path=profile_path,
