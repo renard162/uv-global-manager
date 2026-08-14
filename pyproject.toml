@@ -10,6 +10,7 @@ requires-python = ">=3.10"
 dependencies = [
     "shellingham~=1.5.4",
 ]
+license = "MIT"
 
 [project.scripts]
 uve = "uv_global_manager.main:main"
@@ -17,3 +18,7 @@ uve = "uv_global_manager.main:main"
 [build-system]
 requires = ["uv_build>=0.12.1,<0.13.0"]
 build-backend = "uv_build"
+
+[project.urls]
+Repository = "https://github.com/renard162/uv-global-manager"
+Issues = "https://github.com/renard162/uv-global-manager/issues"
