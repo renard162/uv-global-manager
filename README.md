@@ -8,6 +8,20 @@ Built with native integration for Windows and Linux designed to work across the 
 
 ---
 
+## Installation
+
+UV must be installed and available globally through the system `PATH`.
+
+The recommended way to install UV Global Environment Manager is through UV's tool management:
+
+```bash
+uv tool install uv-global-manager
+```
+
+Once installed, the `uve` command will be available globally.
+
+---
+
 ## Why Global Virtual Environments?
 
 Not every Python task needs a dedicated project. Reusable environments are useful whenever you need an isolated, persistent Python environment for a specific purpose.
