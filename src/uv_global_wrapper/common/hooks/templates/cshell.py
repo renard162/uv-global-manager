@@ -18,6 +18,7 @@ def template_cshell_hook_script() -> str:
         if ($?tcsh) then
             complete uve \
                 'p/1/({commands})/' \
+                'n/help/({commands})/' \
                 'n@activate@`find "$HOME/{venvs_path}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n"`@' \
                 'n@delete@`find "$HOME/{venvs_path}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n"`@'
         endif
