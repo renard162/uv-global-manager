@@ -17,6 +17,10 @@ def template_clink_cmd_hook_script() -> str:
         for command in COMMANDS_DICT.values()
     )
 
+    help_commands = "\n".join(
+        f'                "{command}",' for command in COMMANDS_DICT.values()
+    )
+
     venvs_root = path_as_posix(venvs_root_path(abs_path=False))
 
     return dedent(
@@ -52,8 +56,16 @@ def template_clink_cmd_hook_script() -> str:
             :addarg(venv_matches)
 
 
+        local help_matcher = clink.argmatcher()
+            :addarg({{
+{help_commands}
+            }})
+            :nofiles()
+
+
         clink.argmatcher("uve")
             :addarg({{
+                "help" .. help_matcher,
 {commands}
             }})
 
