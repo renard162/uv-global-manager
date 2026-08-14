@@ -38,6 +38,14 @@ def template_posix_hook_script() -> str:
                     return
                 fi
 
+                if [ "${{COMP_CWORD}}" -eq 2 ] &&
+                [ "${{COMP_WORDS[1]}}" = "help" ]; then
+                    COMPREPLY=(
+                        $(compgen -W "{commands}" -- "$cur")
+                    )
+                    return
+                fi
+
                 if [ "${{COMP_CWORD}}" -ne 2 ]; then
                     return
                 fi
