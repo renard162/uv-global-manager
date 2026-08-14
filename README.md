@@ -1,5 +1,16 @@
 # UV Global Environment Manager
 
+# UV Global Environment Manager
+
+<p align="center">
+  <a href="https://pypi.org/project/uv-global-manager/">
+    <img src="https://img.shields.io/pypi/v/uv-global-manager.svg" alt="Latest PyPI version">
+  </a>
+  <a href="https://github.com/renard162/uv-global-manager">
+    <img src="https://img.shields.io/badge/github-repo-blue?logo=github">
+  </a>
+</p>
+
 > **Bring the convenience of reusable global environments to the speed and simplicity of UV, with seamless multi-shell and cross-platform support.**
 
 UV provides an excellent project-oriented workflow, but not every Python task needs its own project. This tool brings the convenience of reusable global environments to UV, allowing you to create, manage, and quickly switch between isolated environments for experimentation, automation, utilities, development tools, and other recurring tasks.
@@ -10,7 +21,7 @@ Built with native integration for Windows and Linux designed to work across the 
 
 ## Installation
 
-UV must be installed and available globally through the system `PATH`.
+[UV](https://pypi.org/project/uv/) must be installed and available globally through the system `PATH`.
 
 The recommended way to install UV Global Environment Manager is through UV's tool management:
 

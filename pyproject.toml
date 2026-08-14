@@ -48,7 +48,7 @@ dependencies = [
 
 
 [project.urls]
-Homepage = "https://github.com/renard162/uv-global-manager"
+Homepage = "https://pypi.org/project/uv-global-manager"
 Repository = "https://github.com/renard162/uv-global-manager"
 Issues = "https://github.com/renard162/uv-global-manager/issues"
 
