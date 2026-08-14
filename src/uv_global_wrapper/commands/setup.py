@@ -80,6 +80,17 @@ Compatibility:
     as it provides additional functionality such as autocomplete and performs
     autorun through a script, isolating the modification from other terminal programs.
 
+Manual Setup:
+    To set up a shell manually, use --hook-script to generate the hook script
+    for the desired shell, then add a command to load that script to the
+    shell's profile. For example, for bash on Linux, generate the POSIX hook
+    with 'uve setup --hook-script posix' and add the generated script to
+    ~/.bashrc.
+
+    This is the same process performed automatically by --install. The --shell
+    option can be used with --install to install the hook for a shell other
+    than the one currently in use.
+
 Examples:
     uve setup --install ~/.bashrc
     uve setup --reinstall ~/.config/fish/config.fish
@@ -116,7 +127,11 @@ Examples:
     install_group.add_argument(
         "--hook-script",
         choices=SCRIPT_EXTENSIONS.keys(),
-        help="Generate only the hook script for the specified shell.",
+        help=(
+            "Generate the hook script for the specified shell. "
+            "Can also be used to update an existing hook script and includes "
+            "instructions for manual setup."
+        ),
     )
 
     install_group.add_argument(
