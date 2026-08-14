@@ -239,7 +239,7 @@ def build_installation_plan(
     if win_reg_edit:
         if (shell_family != "cmd") or (profile_path is not None) or (os.name != "nt"):
             raise ValueError(
-                "Windows registry installation is only supported on Windows."
+                "Windows registry installation is only supported on Windows and CMD."
             )
 
         block = find_hook_launcher_win_reg()
