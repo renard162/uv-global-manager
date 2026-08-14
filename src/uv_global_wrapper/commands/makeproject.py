@@ -42,6 +42,10 @@ Examples:
     uve make-project myproject --lib
     uve make-project myproject --package
     uve make-project myproject --no-package
+    uve make-project myproject --vcs git
+    uve make-project myproject --vcs none
+    uve make-project myproject --build-backend uv
+    uve make-project myproject --build-backend hatch
     uve make-project myproject --bounds lower
     uve make-project myproject --bounds major
     uve make-project myproject --bounds minor
@@ -54,6 +58,40 @@ Examples:
         nargs="?",
         metavar="NAME",
         help="Project name. The project directory is created using this name.",
+    )
+
+    parser.add_argument(
+        "--vcs",
+        choices=("git", "none"),
+        default=None,
+        metavar="VCS",
+        help=(
+            "Initialize a version control system for the project. "
+            "Valid choices are git and none. "
+            "See 'uv help init' for more information."
+        ),
+    )
+
+    parser.add_argument(
+        "--build-backend",
+        choices=(
+            "uv",
+            "hatch",
+            "flit",
+            "pdm",
+            "poetry",
+            "setuptools",
+            "maturin",
+            "scikit",
+        ),
+        default=None,
+        metavar="BUILD_BACKEND",
+        help=(
+            "Initialize a build backend for the project. "
+            "Valid choices are uv, hatch, flit, pdm, poetry, setuptools, "
+            "maturin, and scikit. "
+            "See 'uv help init' for more information."
+        ),
     )
 
     parser.add_argument(
@@ -152,6 +190,8 @@ def makeproject_run(args: argparse.Namespace):
             python_path=python_path,
             bare=args.bare,
             project_type=args.project_type,
+            vcs=args.vcs,
+            build_backend=args.build_backend,
         )
 
         requirements_path = target_path / "requirements.txt"
@@ -227,6 +267,8 @@ def init_project(
     python_path: Path,
     bare: bool,
     project_type: str | None,
+    vcs: str | None,
+    build_backend: str | None,
 ) -> None:
     command = [
         "uv",
@@ -240,6 +282,12 @@ def init_project(
 
     if project_type is not None:
         command.append(project_type)
+
+    if vcs is not None:
+        command.extend(["--vcs", vcs])
+
+    if build_backend is not None:
+        command.extend(["--build-backend", build_backend])
 
     command.append(str(target_path))
 
