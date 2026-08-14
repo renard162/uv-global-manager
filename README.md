@@ -2,10 +2,10 @@
 
 <p align="center">
   <a href="https://pypi.org/project/uv-global-manager/">
-    <img src="https://img.shields.io/pypi/v/uv-global-manager.svg" alt="Latest PyPI version">
+    <img alt="PyPI Version" src="https://img.shields.io/pypi/v/uv-global-manager">
   </a>
   <a href="https://github.com/renard162/uv-global-manager">
-    <img src="https://img.shields.io/badge/github-repo-blue?logo=github">
+    <img alt="GitHub Repository" src="https://img.shields.io/badge/github-repo-blue?logo=github">
   </a>
 </p>
 
