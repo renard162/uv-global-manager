@@ -35,10 +35,12 @@ def register(subparsers):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
 Project type:
-    Choose one of --app, --lib, --package, or --no-package to define the type
-    and structure of the project. These options are mutually exclusive.
+    Choose one of --bare, --app, --lib, --package, or --no-package to define
+    the type and structure of the project. These options are mutually exclusive.
 
     If none of these options is provided, --package is used by default.
+    Use --bare to create only the project metadata and dependency specification,
+    without creating the project virtual environment or installing dependencies.
     Use --app for an application project, --lib for a library project,
     --package to create a project configured as a Python package, or
     --no-package to create a project without package support.
