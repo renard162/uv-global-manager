@@ -27,7 +27,7 @@ HOOK_SCRIPT_NAMES = {
     "clink-cmd": "uve-clink-cmd.lua",
 }
 
-HOOK_MARKER = "uv-global-wrapper-hook-call"
+HOOK_MARKER = "uv-global-manager-hook-call"
 
 COMMENT_MARKERS = {
     "posix": "#",

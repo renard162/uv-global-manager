@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 
-def wrapper_root_path(abs_path=True) -> Path:
+def manager_root_path(abs_path=True) -> Path:
     root_folder = Path("uvGlobalEnvs")
     if abs_path:
         return Path.home() / root_folder
@@ -12,15 +12,15 @@ def wrapper_root_path(abs_path=True) -> Path:
 
 
 def venvs_root_path(abs_path=True) -> Path:
-    return wrapper_root_path(abs_path) / "Virtualenvs"
+    return manager_root_path(abs_path) / "Virtualenvs"
 
 
 def backup_folder_path(abs_path=True) -> Path:
-    return wrapper_root_path(abs_path) / "Backup"
+    return manager_root_path(abs_path) / "Backup"
 
 
 def resources_path(abs_path=True) -> Path:
-    return wrapper_root_path(abs_path) / "Resources"
+    return manager_root_path(abs_path) / "Resources"
 
 
 def hook_script_path(abs_path=True) -> Path:

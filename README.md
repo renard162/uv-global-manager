@@ -35,7 +35,7 @@ Reusable environments therefore complement project-specific environments by prov
 - Support Windows and Linux.
 - Support the same shells supported by UV.
 - Provide native shell integration across supported platforms.
-- Automatically initialize and maintain the required wrapper infrastructure.
+- Automatically initialize and maintain the required manager infrastructure.
 
 ---
 
@@ -52,6 +52,6 @@ The CLI provides dedicated commands for managing environments, integrating with 
 | `uve activate` | Activates a managed environment in the current shell using the appropriate shell integration, making its Python interpreter and installed tools immediately available. |
 | `uve delete` | Removes a managed environment, with protection against deleting the environment currently in use. |
 | `uve make-project` | Bootstraps a standard UV project from the currently active global environment, carrying its Python configuration and dependencies into the new project while allowing the resulting project to be customized through UV's project options. |
-| `uve setup` | Configures the wrapper and its shell integration, with automatic setup available for normal installations and additional resources for users who prefer to perform the setup manually. |
+| `uve setup` | Configures the manager and its shell integration, with automatic setup available for normal installations and additional resources for users who prefer to perform the setup manually. |
 
 ---
