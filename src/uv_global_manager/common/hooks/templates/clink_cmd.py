@@ -23,8 +23,9 @@ def template_clink_cmd_hook_script() -> str:
 
     venvs_root = path_as_posix(venvs_root_path(abs_path=False))
 
-    return dedent(
-        f"""
+    return (
+        dedent(
+            f"""
         local VENV_ROOT = "{venvs_root}"
 
 
@@ -148,4 +149,6 @@ def template_clink_cmd_hook_script() -> str:
             return handle_uve(line)
         end)
         """
-    ).strip()
+        ).strip()
+        + "\n"
+    )

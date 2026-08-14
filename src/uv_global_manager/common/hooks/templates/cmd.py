@@ -2,7 +2,8 @@ from textwrap import dedent
 
 
 def template_cmd_hook_script() -> str:
-    return dedent(r"""
+    return (
+        dedent(r"""
         @echo off
 
         if /i "%~1"=="activate" (
@@ -20,3 +21,5 @@ def template_cmd_hook_script() -> str:
         :passthrough
         uve.exe %*
     """).strip()
+        + "\n"
+    )

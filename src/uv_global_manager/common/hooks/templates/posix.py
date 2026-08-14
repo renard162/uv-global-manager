@@ -11,7 +11,8 @@ def template_posix_hook_script() -> str:
     venvs_path = path_as_posix(venvs_root_path(abs_path=False))
     commands = " ".join(COMMANDS_DICT.values())
 
-    return dedent(f"""
+    return (
+        dedent(f"""
         uve() {{
             if [ "$1" = "activate" ] &&
             [ -n "$2" ] &&
@@ -74,3 +75,5 @@ def template_posix_hook_script() -> str:
             complete -o default -o nospace -F _uve_complete uve
         fi
     """).strip()
+        + "\n"
+    )

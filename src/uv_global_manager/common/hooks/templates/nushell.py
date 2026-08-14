@@ -13,7 +13,8 @@ def template_nushell_hook_script() -> str:
     root_folder = path_as_posix(venvs_root_path(abs_path=False))
     script_folder = venv_script_folder_name()
 
-    return dedent(f"""
+    return (
+        dedent(f"""
         def --env deactivate [] {{
             if "UVE_OLD_PATH" not-in $env {{
                 return
@@ -121,3 +122,5 @@ def template_nushell_hook_script() -> str:
             ^uve ...$args
         }}
     """).strip()
+        + "\n"
+    )

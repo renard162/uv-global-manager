@@ -11,8 +11,9 @@ def template_fish_hook_script() -> str:
     commands = " ".join(COMMANDS_DICT.values())
     venvs_path = path_as_posix(venvs_root_path(abs_path=False))
 
-    return dedent(
-        f"""
+    return (
+        dedent(
+            f"""
         function uve
             if test (count $argv) -ge 2
                 if test "$argv[1]" = "activate"
@@ -43,4 +44,6 @@ def template_fish_hook_script() -> str:
                     end
                 end)'
         """
-    ).strip()
+        ).strip()
+        + "\n"
+    )

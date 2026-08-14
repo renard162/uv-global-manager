@@ -11,7 +11,8 @@ def template_xonsh_hook_script() -> str:
     commands = repr(tuple(COMMANDS_DICT.values()))
     venvs_path = path_as_posix(venvs_root_path(abs_path=False))
 
-    return dedent(f"""
+    return (
+        dedent(f"""
         import os
         import subprocess
         import sys
@@ -81,3 +82,5 @@ def template_xonsh_hook_script() -> str:
         _uve.xonsh_complete = _uve_complete
         __xonsh__.aliases["uve"] = _uve
     """).strip()
+        + "\n"
+    )

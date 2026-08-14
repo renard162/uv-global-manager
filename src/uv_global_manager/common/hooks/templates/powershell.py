@@ -11,7 +11,8 @@ def template_powershell_hook_script() -> str:
     commands = " ".join(COMMANDS_DICT.values())
     venvs_path = path_as_windows(venvs_root_path(abs_path=False))
 
-    return dedent(f"""
+    return (
+        dedent(f"""
         $uve_command = (Get-Command uve -CommandType Application).Source
 
         function uve {{
@@ -95,3 +96,5 @@ def template_powershell_hook_script() -> str:
             & $uve_command @Arguments
         }}
     """).strip()
+        + "\n"
+    )
