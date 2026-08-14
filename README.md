@@ -29,6 +29,8 @@ uv tool install uv-global-manager
 
 Once installed, the `uve` command will be available globally.
 
+Run `uve setup` to configure the shell integration and explore the available setup options.
+
 ---
 
 ## Why Global Virtual Environments?
