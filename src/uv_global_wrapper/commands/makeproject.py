@@ -34,6 +34,17 @@ def register(subparsers):
         allow_abbrev=False,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""\
+Project type:
+    Choose one of --app, --lib, --package, or --no-package to define the type
+    and structure of the project. These options are mutually exclusive.
+
+    If none of these options is provided, --package is used by default.
+    Use --app for an application project, --lib for a library project,
+    --package to create a project configured as a Python package, or
+    --no-package to create a project without package support.
+
+    See "uv help init" for more details about these project types.
+
 Examples:
     uve make-project
     uve make-project myproject
