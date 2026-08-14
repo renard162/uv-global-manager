@@ -1,7 +1,5 @@
 # UV Global Environment Manager
 
-# UV Global Environment Manager
-
 <p align="center">
   <a href="https://pypi.org/project/uv-global-manager/">
     <img src="https://img.shields.io/pypi/v/uv-global-manager.svg" alt="Latest PyPI version">
