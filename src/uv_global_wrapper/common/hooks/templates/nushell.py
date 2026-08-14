@@ -78,6 +78,10 @@ def template_nushell_hook_script() -> str:
 
             let subcommand = $spans.1
 
+            if $subcommand == "help" {{
+                return {commands}
+            }}
+
             if $subcommand not-in ["activate", "delete"] {{
                 return []
             }}
