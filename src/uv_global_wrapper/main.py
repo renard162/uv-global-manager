@@ -95,5 +95,5 @@ def integrity_check():
     if (which("uv") is None) or (which("uvx") is None):
         raise FileNotFoundError(
             "Required executables 'UV' and 'UVX' was not found in the PATH. "
-            "Install UV and ensure it is accessible from the command line before using uv-global-wrapper."
+            "Install UV and ensure it is accessible from the command line before using uv-global-manager."
         )
