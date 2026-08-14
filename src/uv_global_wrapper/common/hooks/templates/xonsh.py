@@ -34,6 +34,15 @@ def template_xonsh_hook_script() -> str:
 
             subcommand = command.args[1].value
 
+            if subcommand == "help":
+                prefix = command.prefix
+
+                return {{
+                    option
+                    for option in _uve_commands
+                    if option.startswith(prefix)
+                }}
+
             if subcommand not in ("activate", "delete"):
                 return None
 
