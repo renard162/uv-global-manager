@@ -33,7 +33,10 @@ def template_powershell_hook_script() -> str:
                             ForEach-Object Value
                     )
 
-                    if ($arguments.Count -eq 0) {{
+                    if (
+                        $arguments.Count -eq 0 -or
+                        ($arguments.Count -eq 1 -and $arguments[0] -eq "help")
+                    ) {{
                         "{commands}".Split(" ") |
                             Where-Object {{ $_ -like "$wordToComplete*" }} |
                             ForEach-Object {{
