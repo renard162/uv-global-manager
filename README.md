@@ -1,23 +1,16 @@
-# UV Wrapper for Global Virtual Environments
+# UV Global Environment Manager
 
-# VERSÃO ANTIGA, BASEADA EM SCRIPTS, REFAZER README APÓS TERMINADO DESENVOLVIMENTO BASE
+> **Bring the convenience of reusable global environments to the speed and simplicity of UV, with seamless multi-shell and cross-platform support.**
 
-> **Bring the convenience of global virtual environments to the speed and simplicity of UV.**
+UV provides an excellent project-oriented workflow, but not every Python task needs its own project. This tool brings the convenience of reusable global environments to UV, allowing you to create, manage, and quickly switch between isolated environments for experimentation, automation, utilities, development tools, and other recurring tasks.
 
-While UV is an outstanding tool for project-oriented Python development, many developers still rely on reusable global virtual environments for experimentation, automation, personal tooling, and utility applications.
-
-This wrapper extends UV with a familiar workflow for creating and managing global virtual environments, allowing you to maintain isolated Python installations that are independent of any specific project.
-
-Instead of creating a new environment for every experiment, you can build a collection of reusable environments, each tailored for a different purpose, while still benefiting from UV's performance and dependency management.
-
-When an experiment evolves into a real project, you can seamlessly bootstrap a new standard UV project from your currently active global environment. This lets you carry over an already configured Python version and toolset, making it easy to transition from quick experimentation to a dedicated, project-oriented workflow without starting from scratch.
-
+Built with native integration for Windows and Linux designed to work across the same shells supported by UV, it provides a consistent workflow without relying on platform-specific scripts. When an experiment grows into a real project, the active environment can also be used as the starting point for a standard UV project, making the transition from experimentation to development straightforward.
 
 ---
 
 ## Why Global Virtual Environments?
 
-Project-specific environments are the recommended approach for software development, but they are not always the most practical solution.
+Not every Python task needs a dedicated project. Reusable environments are useful whenever you need an isolated, persistent Python environment for a specific purpose.
 
 Many everyday tasks do not belong to a dedicated project:
 
@@ -25,82 +18,40 @@ Many everyday tasks do not belong to a dedicated project:
 - Running utility scripts.
 - Experimenting with new technologies.
 - Maintaining automation tools.
+- Building dedicated data science environments.
 - Keeping separate environments for different Python versions.
 - Creating specialized environments with pre-installed applications such as Spyder, Jupyter, or scientific libraries.
 
-For example, you might want a permanent environment dedicated to Spyder, providing a workflow similar to MATLAB, another one for data science experiments, and another one for automation scripts. Each environment remains fully isolated from your system Python while being immediately reusable whenever needed.
+For example, a dedicated environment can provide a Python-based workflow similar to MATLAB by installing Spyder and the required scientific libraries. Other environments can be tailored to any of the use cases above, with each environment remaining fully isolated from the system Python while being immediately available whenever needed.
 
-This wrapper makes that workflow straightforward by managing global virtual environments powered by UV.
+Reusable environments therefore complement project-specific environments by providing persistent, purpose-built Python installations for tasks that do not require a dedicated project.
 
 ---
 
 # Features
 
-- Create reusable global virtual environments.
-- Activate existing environments with a single command.
-- List all managed environments.
-- Remove environments when they are no longer needed.
-- Create new UV projects that automatically use the currently active global environment.
-- Preserve the speed and dependency management of UV while adding a convenient global workflow.
+- Manage reusable global virtual environments (create, activate, list, and remove).
+- Bootstrap standard UV projects from the active environment.
+- Support Windows and Linux.
+- Support the same shells supported by UV.
+- Provide native shell integration across supported platforms.
+- Automatically initialize and maintain the required wrapper infrastructure.
 
 ---
 
 # Available Commands
 
-All wrapper commands provide built-in help through the standard `-h` or `--help` options, which display detailed usage information, available arguments, and examples.
-
-The wrapper is designed to work seamlessly from the Windows Command Prompt (CMD), Windows PowerShell 5.1 or later, and Bash on Windows (such as Git Bash), allowing you to use the same commands regardless of your preferred shell.
+The CLI provides dedicated commands for managing environments, integrating with the current shell, and transitioning from reusable environments to standard UV projects. Run `uve help <command>` to view the complete help, including available options and examples for any command.
 
 ---
 
-## `uv-mkvenv`
-
-Creates a new global virtual environment managed by the wrapper.
-
-Use this command whenever you need a reusable environment for experimentation, personal tooling, or long-lived utilities.
-
----
-
-## `uv-rmvenv`
-
-Deletes a global virtual environment previously created by the wrapper.
-
-Only environments managed by the wrapper are affected, leaving any unrelated Python environments untouched.
+| Command | Description |
+| :------ | :---------- |
+| `uve create` | Creates a reusable global virtual environment using any Python version supported by UV. The selected Python version can be downloaded automatically by UV when needed, and dependencies can optionally be installed from a requirements file during creation. |
+| `uve list` | Lists managed environments and provides filtering and inspection options, including Python implementation, version, size, and environment statistics. |
+| `uve activate` | Activates a managed environment in the current shell using the appropriate shell integration, making its Python interpreter and installed tools immediately available. |
+| `uve delete` | Removes a managed environment, with protection against deleting the environment currently in use. |
+| `uve make-project` | Bootstraps a standard UV project from the currently active global environment, carrying its Python configuration and dependencies into the new project while allowing the resulting project to be customized through UV's project options. |
+| `uve setup` | Configures the wrapper and its shell integration, with automatic setup available for normal installations and additional resources for users who prefer to perform the setup manually. |
 
 ---
-
-## `uv-workon`
-
-Lists all global virtual environments managed by the wrapper.
-
-When an environment name is provided, the command activates that environment, making it immediately available for use.
-
-This provides a workflow similar to the well-known `workon` command from virtualenvwrapper, while using UV as the underlying engine.
-
----
-
-## `uv-createproject`
-
-Creates a new project following the standard UV project layout using the currently active global virtual environment.
-
-This makes it easy to turn an experiment into a dedicated project by bootstrapping a new UV project from an environment that is already configured with the desired Python version and tooling.
-
----
-
-## `uv-setup-wrapper`
-
-Initializes or restores the wrapper's internal directory structure.
-
-This command is executed automatically whenever one of the wrapper commands is invoked, ensuring that the required directories are always available. It can also be run manually with the appropriate option to recreate the wrapper's directory structure as if it had just been installed, without affecting any existing global virtual environments. This makes it useful for recovering from accidental modifications or other local issues without requiring a full reinstallation.
-
----
-
-# Why Use This Wrapper?
-
-UV was designed with a strong focus on project-based development, making it an excellent choice for managing modern Python projects.
-
-At the same time, many developers still prefer keeping a few reusable global virtual environments for tasks that are not tied to a specific project. They are convenient for trying out new libraries, running personal scripts, maintaining development tools, or working with applications that benefit from a permanent environment.
-
-This wrapper complements that workflow by bringing the convenience of global virtual environments to UV. You can create, manage, and reuse isolated environments for everyday work, and when an experiment eventually becomes a real project, you can easily bootstrap a standard UV project from the environment you have already configured.
-
-If you regularly switch between small experiments, automation scripts, and full projects, this wrapper helps reduce repetitive setup while preserving the workflow and performance that make UV appealing.
