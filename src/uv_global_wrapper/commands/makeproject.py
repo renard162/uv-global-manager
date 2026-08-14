@@ -260,6 +260,7 @@ def apply_bounds(
         return requirements
 
     result = []
+    errors = []
 
     for line in requirements.splitlines(keepends=True):
         stripped = line.strip()
@@ -280,6 +281,7 @@ def apply_bounds(
 
         if match is None:
             result.append(line)
+            errors.append(line)
             continue
 
         package = match.group("package")
@@ -287,26 +289,36 @@ def apply_bounds(
         suffix = match.group("suffix")
         newline = match.group("newline") or ""
 
-        version_parts = [int(part) for part in version.split(".")]
+        try:
+            version_parts = [int(part) for part in version.split(".")]
 
-        if bounds == "lower":
-            requirement = f"{package}>={version}"
+            if bounds == "lower":
+                requirement = f"{package}>={version}"
 
-        elif bounds == "major":
-            major = version_parts[0]
-            upper_bound = f"{major + 1}.0.0"
-            requirement = f"{package}>={version},<{upper_bound}"
+            elif bounds == "major":
+                major = version_parts[0]
+                upper_bound = f"{major + 1}.0.0"
+                requirement = f"{package}>={version},<{upper_bound}"
 
-        elif bounds == "minor":
-            major = version_parts[0]
-            minor = version_parts[1]
-            upper_bound = f"{major}.{minor + 1}.0"
-            requirement = f"{package}>={version},<{upper_bound}"
+            else:  # bounds == "minor"
+                major = version_parts[0]
+                minor = version_parts[1]
+                upper_bound = f"{major}.{minor + 1}.0"
+                requirement = f"{package}>={version},<{upper_bound}"
 
-        else:
-            raise ValueError(f'Unsupported dependency bound: "{bounds}".')
+        except (ValueError, IndexError):
+            result.append(line)
+            errors.append(line)
+            continue
 
         result.append(f"{requirement}{suffix}{newline}")
+
+    if errors:
+        print_stderr(
+            "The following requirements could not be processed. "
+            'Their versions were kept as "exact":'
+        )
+        print_stderr("".join(errors).rstrip())
 
     return "".join(result)
 
