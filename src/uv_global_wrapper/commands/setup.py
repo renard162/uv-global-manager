@@ -65,11 +65,12 @@ Supported Shells:
     clink-cmd   : cmd with clink addon
 
 Compatibility:
-    cmd and csh have limited compatibility: only the shell hook is available,
-    without autocomplete support. For cmd, install Clink and use the
-    clink-cmd addon to provide full shell functionality, including
+    cmd, csh, ksh and zsh have limited compatibility: only the shell hook is
+    available, without autocomplete support. For cmd, install Clink and use
+    the clink-cmd addon to provide full shell functionality, including
     autocomplete. For csh, use tcsh instead, which provides the same
-    additional shell functionality, including autocomplete.
+    additional shell functionality, including autocomplete. For ksh and zsh,
+    use bash instead for full POSIX shell compatibility, including autocomplete.
 
     Installing the cmd hook through {WIN_REGISTRY_PROFILE} modifies the
     Windows CMD AutoRun registry configuration. This can cause bugs or
