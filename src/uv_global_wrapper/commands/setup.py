@@ -84,7 +84,7 @@ Manual Setup:
     To set up a shell manually, use --hook-script to generate the hook script
     for the desired shell, then add a command to load that script to the
     shell's profile. For example, for bash on Linux, generate the POSIX hook
-    with 'uve setup --hook-script posix' and add the generated script to
+    with 'uve setup --hook-script posix' and source the generated script into
     ~/.bashrc.
 
     This is the same process performed automatically by --install. The --shell
