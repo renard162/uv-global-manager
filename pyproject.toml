@@ -1,24 +1,60 @@
 [project]
 name = "uv-global-manager"
-version = "1.0.0"
-description = "Add your description here"
+version = "1.0.0.dev2"
+description = "A cross-platform, multi-shell CLI for managing reusable global Python environments with UV and bootstrapping standard UV projects."
 readme = "README.md"
+
 authors = [
-    { name = "Samuel Oliveira", email = "renard162@gmail.com" }
+    { name = "Samuel Oliveira" },
 ]
-requires-python = ">=3.10"
-dependencies = [
-    "shellingham~=1.5.4",
-]
+
 license = "MIT"
+license-files = ["LICENSE"]
 
-[project.scripts]
-uve = "uv_global_manager.main:main"
+keywords = [
+    "uv",
+    "python",
+    "virtual-environment",
+    "global-environment",
+    "environment-manager",
+    "cli",
+    "shell-integration",
+    "cross-platform",
+]
 
-[build-system]
-requires = ["uv_build>=0.12.1,<0.13.0"]
-build-backend = "uv_build"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: System :: Shells",
+]
+
+requires-python = ">=3.10"
+
+dependencies = [
+    "shellingham==1.5.4",
+]
+
 
 [project.urls]
 Repository = "https://github.com/renard162/uv-global-manager"
 Issues = "https://github.com/renard162/uv-global-manager/issues"
+
+
+[project.scripts]
+uve = "uv_global_manager.main:main"
+
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"
