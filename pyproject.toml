@@ -1,6 +1,6 @@
 [project]
 name = "uv-global-manager"
-version = "1.0.2"
+version = "1.0.3"
 description = "A cross-platform, multi-shell CLI for managing reusable global Python environments with uv and bootstrapping standard uv projects."
 readme = "README.md"
 
@@ -9,7 +9,10 @@ authors = [
 ]
 
 license = "MIT"
-license-files = ["LICENSE"]
+license-files = [
+    "LICENSE",
+    "LICENSES/Shellingham"
+]
 
 keywords = [
     "uv",

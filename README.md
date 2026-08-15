@@ -54,7 +54,7 @@ Reusable environments therefore complement project-specific environments by prov
 
 ---
 
-# Features
+## Features
 
 - Manage reusable global virtual environments (create, activate, list, and remove).
 - Bootstrap standard UV projects from the active environment.
@@ -65,7 +65,7 @@ Reusable environments therefore complement project-specific environments by prov
 
 ---
 
-# Available Commands
+## Available Commands
 
 The CLI provides dedicated commands for managing environments, integrating with the current shell, and transitioning from reusable environments to standard UV projects. Run `uve help <command>` to view the complete help, including available options and examples for any command.
 
@@ -81,3 +81,9 @@ The CLI provides dedicated commands for managing environments, integrating with 
 | `uve setup` | Configures the manager and its shell integration, with automatic setup available for normal installations and additional resources for users who prefer to perform the setup manually. |
 
 ---
+
+## Acknowledgments
+
+This project would not be possible without:
+
+- [Shellingham](https://pypi.org/project/shellingham), by Tzu-ping Chung.
