@@ -91,6 +91,11 @@ Manual Setup:
     option can be used with --install to install the hook for a shell other
     than the one currently in use.
 
+    The uve command must be available in the system PATH for the installed
+    hook to work. The hook invokes uve when the shell starts, so installing
+    the hook alone is not sufficient if the command cannot be resolved through
+    the system PATH.
+
 Examples:
     uve setup --install ~/.bashrc
     uve setup --reinstall ~/.config/fish/config.fish
@@ -110,7 +115,8 @@ Examples:
         help=(
             "Install shell hooks into PROFILE. "
             f"Use '{WIN_REGISTRY_PROFILE}' as PROFILE to install the hook "
-            "in the Windows CMD AutoRun configuration."
+            "in the Windows CMD AutoRun configuration. "
+            "The uve command must be available in the system PATH."
         ),
     )
 
@@ -120,7 +126,8 @@ Examples:
         help=(
             "Reinstall/Update/Recover shell hooks into PROFILE. "
             f"Use '{WIN_REGISTRY_PROFILE}' as PROFILE to install the hook "
-            "in the Windows CMD AutoRun configuration."
+            "in the Windows CMD AutoRun configuration. "
+            "The uve command must be available in the system PATH."
         ),
     )
 
