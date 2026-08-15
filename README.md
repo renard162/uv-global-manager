@@ -25,6 +25,7 @@ The recommended way to install UV Global Environment Manager is through UV's too
 
 ```bash
 uv tool install uv-global-manager
+uv tool update-shell
 ```
 
 Once installed, the `uve` command will be available globally.
