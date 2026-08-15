@@ -3,13 +3,13 @@ import os
 import sys
 from importlib import import_module
 
+from . import __version__
 from .commands import COMMANDS_DICT
 from .common.utils import which_path_only as which
 
 
 def main():
     try:
-        integrity_check()
         parser = argparse.ArgumentParser(
             prog="uve",
             description=(
@@ -18,6 +18,12 @@ def main():
                 '"uv python", and create UV projects from existing global virtual '
                 "environments as project templates."
             ),
+        )
+
+        parser.add_argument(
+            "--version",
+            action="version",
+            version=f"%(prog)s {__version__}",
         )
 
         sub = parser.add_subparsers(dest="command")
@@ -60,6 +66,8 @@ Examples:
         )
 
         args = parser.parse_args()
+
+        integrity_check()
 
         if args.command is None:
             parser.print_help()
