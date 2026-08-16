@@ -29,6 +29,10 @@ def register(subparsers):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         allow_abbrev=False,
         epilog="""\
+Notes:
+    The environment provides pip and pip3 aliases for uv pip.
+    Installing the official pip package replaces these aliases.
+
 Examples:
     uve create myenv
     uve create myenv --python 3.12

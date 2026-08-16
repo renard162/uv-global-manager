@@ -73,7 +73,7 @@ The CLI provides dedicated commands for managing environments, integrating with 
 
 | Command | Description |
 | :------ | :---------- |
-| `uve create` | Creates a reusable global virtual environment using any Python version supported by UV. The selected Python version can be downloaded automatically by UV when needed, and dependencies can optionally be installed from a requirements file during creation. |
+| `uve create` | Creates a reusable global virtual environment using any Python version supported by UV. The selected Python version can be downloaded automatically by UV when needed, and dependencies can optionally be installed from a requirements file during creation. When the environment is active, `pip` and `pip3` commands are provided as `uv pip` aliases for convenience. If the official pip package is installed in the environment, it replaces these aliases. |
 | `uve list` | Lists managed environments and provides filtering and inspection options, including Python implementation, version, size, and environment statistics. |
 | `uve activate` | Activates a managed environment in the current shell using the appropriate shell integration, making its Python interpreter and installed tools immediately available. |
 | `uve delete` | Removes a managed environment, with protection against deleting the environment currently in use. |
